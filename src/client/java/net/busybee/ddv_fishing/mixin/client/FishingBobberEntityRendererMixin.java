@@ -1,14 +1,13 @@
 package net.busybee.ddv_fishing.mixin.client;
 
 import net.busybee.ddv_fishing.client.hud.FishingMinigameOverlay;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.FishingBobberEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -16,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class FishingBobberEntityRendererMixin {
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void applyVibrationAndRenderHead(@Coerce Object state, MatrixStack matrices, @Coerce Object commands, @Coerce Object cameraState, CallbackInfo ci) {
+    private void applyVibrationAndRenderHead(FishingBobberEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
         if (FishingMinigameOverlay.isActive()) {
 
             float diff = FishingMinigameOverlay.getTargetDiff();
@@ -32,10 +31,9 @@ public class FishingBobberEntityRendererMixin {
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void renderMinigameTail(@Coerce Object state, MatrixStack matrices, @Coerce Object commands, @Coerce Object cameraState, CallbackInfo ci) {
+    private void renderMinigameTail(FishingBobberEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
         if (FishingMinigameOverlay.isActive()) {
-            VertexConsumerProvider vcp = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
-            FishingMinigameOverlay.renderWorld(matrices, vcp, 0.0f);
+            FishingMinigameOverlay.renderWorld(matrices, vertexConsumers, tickDelta);
         }
     }
 }

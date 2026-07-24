@@ -15,7 +15,7 @@ public class ModEntities {
             RIPPLE_ID,
             EntityType.Builder.create(FishingRippleEntity::new, SpawnGroup.MISC)
                     .dimensions(2.0f, 0.5f)
-                    .build(RIPPLE_ID.getPath())
+                    .build()
     );
 
     public static void register() {
