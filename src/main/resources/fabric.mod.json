@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "ddv_fishing",
-  "version": "2026.7.0",
+  "version": "${version}",
   "name": "Dreamlight Fishing",
   "description": "A realistic, arcade-style fishing mod inspired by Disney Dreamlight Valley.",
   "authors": [
@@ -30,8 +30,16 @@
     }
   ],
   "depends": {
-    "fabricloader": ">=0.19.3",
-    "fabric-api": "*",
-    "minecraft": ">=1.21.1 <=1.21.11"
+    "fabricloader": ">=${loader_version}",
+    "minecraft": ">=1.21 <=1.21.11",
+    "java": ">=21",
+    "fabric-api-base": "*",
+    "fabric-lifecycle-events-v1": "*",
+    "fabric-networking-api-v1": "*",
+    "fabric-rendering-v1": "*",
+    "fabric-registry-sync-v0": "*"
+  },
+  "recommends": {
+    "fabric-api": "*"
   }
 }

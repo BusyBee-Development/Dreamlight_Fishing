@@ -6,11 +6,10 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
 import net.minecraft.world.World;
 
 public class FishingRippleEntity extends Entity {
@@ -39,7 +38,7 @@ public class FishingRippleEntity extends Entity {
     }
 
     @Override
-    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+    public boolean damage(DamageSource source, float amount) {
         return false;
     }
 
@@ -101,12 +100,12 @@ public class FishingRippleEntity extends Entity {
     }
 
     @Override
-    protected void readCustomData(ReadView view) {
-        setRarity(view.getInt("Rarity", 0));
+    protected void readCustomDataFromNbt(NbtCompound nbt) {
+        setRarity(nbt.getInt("Rarity"));
     }
 
     @Override
-    protected void writeCustomData(WriteView view) {
-        view.putInt("Rarity", getRarity());
+    protected void writeCustomDataToNbt(NbtCompound nbt) {
+        nbt.putInt("Rarity", getRarity());
     }
 }

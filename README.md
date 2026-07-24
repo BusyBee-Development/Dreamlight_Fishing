@@ -47,10 +47,11 @@ When a fish bites, the **Fishing Minigame** begins. You will see a shrinking rin
 ## Installation & Requirements
 
 - **Platform**: Fabric
-- **Versions**: Minecraft 1.21.1 - 1.21.11
+- **Versions**: Minecraft 1.21 - 1.21.11
 - **Dependencies**: 
     - Fabric Loader (>=0.19.3)
-    - Fabric API
+    - Fabric API (specifically: base, lifecycle-events-v1, networking-api-v1, rendering-v1, registry-sync-v0)
+    - Java 21+
 
 ## Credits
 

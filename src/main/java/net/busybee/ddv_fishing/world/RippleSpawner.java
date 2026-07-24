@@ -11,7 +11,7 @@ import net.minecraft.util.math.BlockPos;
 public class RippleSpawner {
     public static void register() {
         ServerTickEvents.END_WORLD_TICK.register(world -> {
-            if (world.getTime() % 20 == 0) {
+            if (world.getServer().getTicks() % 20 == 0) {
                 for (ServerPlayerEntity player : world.getPlayers()) {
                     if (world.getRandom().nextFloat() < 0.3f) {
                         spawnRippleNear(world, player);

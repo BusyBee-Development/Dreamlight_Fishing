@@ -3,7 +3,6 @@ package net.busybee.ddv_fishing;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -38,7 +37,7 @@ public class FishingLootHandler {
         EntityType<? extends LivingEntity> entityType = ITEM_TO_ENTITY.get(lootStack.getItem());
 
         if (entityType != null) {
-            LivingEntity fish = entityType.create(world, SpawnReason.EVENT);
+            LivingEntity fish = entityType.create(world);
             if (fish != null) {
                 fish.refreshPositionAndAngles(bobber.getX(), bobber.getY(), bobber.getZ(), world.getRandom().nextFloat() * 360.0F, 0.0F);
                 fish.setHealth(1.0f);

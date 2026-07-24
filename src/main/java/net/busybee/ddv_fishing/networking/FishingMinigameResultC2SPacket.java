@@ -10,8 +10,8 @@ public record FishingMinigameResultC2SPacket(boolean success, boolean isPerfect)
     public static final Id<FishingMinigameResultC2SPacket> ID = new Id<>(Identifier.of("ddv_fishing", "minigame_result"));
 
     public static final PacketCodec<RegistryByteBuf, FishingMinigameResultC2SPacket> CODEC = PacketCodec.tuple(
-            PacketCodecs.BOOLEAN, FishingMinigameResultC2SPacket::success,
-            PacketCodecs.BOOLEAN, FishingMinigameResultC2SPacket::isPerfect,
+            PacketCodecs.BOOL, FishingMinigameResultC2SPacket::success,
+            PacketCodecs.BOOL, FishingMinigameResultC2SPacket::isPerfect,
             FishingMinigameResultC2SPacket::new
     );
 
