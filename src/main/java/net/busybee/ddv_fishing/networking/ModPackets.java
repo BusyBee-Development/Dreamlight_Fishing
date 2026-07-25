@@ -1,7 +1,7 @@
 package net.busybee.ddv_fishing.networking;
 
 import net.busybee.ddv_fishing.FishingLootHandler;
-import net.busybee.ddv_fishing.mixin.FishingBobberReelAccess;
+import net.busybee.ddv_fishing.access.FishingBobberReelAccess;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.projectile.FishingBobberEntity;

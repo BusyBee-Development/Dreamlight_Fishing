@@ -1,6 +1,6 @@
 package net.busybee.ddv_fishing;
 
-import net.busybee.ddv_fishing.mixin.FishingBobberReelAccess;
+import net.busybee.ddv_fishing.access.FishingBobberReelAccess;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;

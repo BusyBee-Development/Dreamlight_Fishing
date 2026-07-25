@@ -1,5 +1,6 @@
 package net.busybee.ddv_fishing.mixin;
 
+import net.busybee.ddv_fishing.access.FishingBobberReelAccess;
 import net.busybee.ddv_fishing.FishingLootHandler;
 import net.busybee.ddv_fishing.entity.FishingRippleEntity;
 import net.busybee.ddv_fishing.networking.FishingMinigameS2CPacket;
