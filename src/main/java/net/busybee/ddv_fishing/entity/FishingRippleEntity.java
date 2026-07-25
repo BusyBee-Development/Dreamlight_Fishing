@@ -59,10 +59,10 @@ public class FishingRippleEntity extends Entity {
     @Override
     public void tick() {
         super.tick();
-        //? if >1.21.1 {
+        //? if >1.21.8 {
         World world = this.getEntityWorld();
         //?}
-        //? if <=1.21.1 {
+        //? if <=1.21.8 {
         /*World world = this.getWorld();*/
         //?}
         if (world instanceof ServerWorld serverWorld) {
@@ -132,7 +132,11 @@ public class FishingRippleEntity extends Entity {
     //? if <=1.21.5 {
     /*@Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
+        //? if =1.21.5 {
+        setRarity(nbt.getInt("Rarity").orElse(0));
+        //?} else {
         setRarity(nbt.getInt("Rarity"));
+        //?}
     }
 
     @Override

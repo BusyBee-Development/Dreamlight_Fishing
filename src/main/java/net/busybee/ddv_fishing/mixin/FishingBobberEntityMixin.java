@@ -46,7 +46,11 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
     @Inject(method = "tick", at = @At("TAIL"))
     private void checkRipples(CallbackInfo ci) {
         FishingBobberEntity bobber = (FishingBobberEntity)(Object)this;
-        World world = bobber.getWorld();
+        //? if >1.21.8 {
+        World world = bobber.getEntityWorld();
+        //?} else {
+        /*World world = bobber.getWorld();*/
+        //?}
         if (world.isClient() || this.minigameActive || this.reeling || bobber.getHookedEntity() != null || bobber.isRemoved()) return;
 
         List<FishingRippleEntity> ripples = world.getEntitiesByClass(

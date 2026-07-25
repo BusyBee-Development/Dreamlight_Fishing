@@ -111,7 +111,11 @@ public class FishingMinigameOverlay {
 
         context.fill(centerX - 2, centerY - 48, centerX + 2, centerY + 48, 0xAA00FF00);
         context.fill(centerX - 48, centerY - 2, centerX + 48, centerY + 2, 0xAA00FF00);
+        //? if >=1.21.5 {
         int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickProgress(false), prevRingScale, ringScale) * 32.0F);
+        //?} else {
+        /*int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickDelta(false), prevRingScale, ringScale) * 32.0F);*/
+        //?}
         int ringColor = isSafeToClick() ? 0xFF00FF00 : 0xFFFF4444;
         drawRing(context, centerX, centerY, ringRadius, ringColor);
 
@@ -147,7 +151,11 @@ public class FishingMinigameOverlay {
     }
 
     private static void renderWorldRing(net.minecraft.client.util.math.MatrixStack matrices, net.minecraft.client.render.VertexConsumerProvider vertexConsumers, float scale, float r, float g, float b, float a, Identifier texture) {
+        //? if >=1.21.11 {
         net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayers.entityTranslucent(texture));
+        //?} else {
+        /*net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayer.getEntityTranslucent(texture));*/
+        //?}
         float size = scale * 1.5f; // Adjust size for world-space
         
         net.minecraft.client.util.math.MatrixStack.Entry entry = matrices.peek();

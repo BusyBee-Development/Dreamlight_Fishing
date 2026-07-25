@@ -42,10 +42,10 @@ public class FishingLootHandler {
             return false;
         }
 
-        //? if >1.21.1 {
+        //? if >1.21.8 {
         ServerWorld world = (ServerWorld) bobber.getEntityWorld();
         //?}
-        //? if <=1.21.1 {
+        //? if <=1.21.8 {
         /*ServerWorld world = (ServerWorld) bobber.getWorld();*/
         //?}
 
@@ -83,10 +83,10 @@ public class FishingLootHandler {
             ReelState reel = ACTIVE_REELS.get(player.getUuid());
             if (reel != null && reel.bobber == bobber) {
                 reel.boosting = 10;
-                //? if >1.21.1 {
+                //? if >1.21.8 {
                 ServerWorld world = (ServerWorld) player.getEntityWorld();
                 //?}
-                //? if <=1.21.1 {
+                //? if <=1.21.8 {
                 /*ServerWorld world = (ServerWorld) player.getWorld();*/
                 //?}
                 world.playSound(null, player.getX(), player.getY(), player.getZ(),
@@ -105,10 +105,10 @@ public class FishingLootHandler {
             ServerPlayerEntity player = reel.player;
             FishingBobberEntity bobber = reel.bobber;
 
-            //? if >1.21.1 {
+            //? if >1.21.8 {
             boolean wrongWorld = fish.getEntityWorld() != player.getEntityWorld();
             //?}
-            //? if <=1.21.1 {
+            //? if <=1.21.8 {
             /*boolean wrongWorld = fish.getWorld() != player.getWorld();*/
             //?}
             if (fish.isRemoved() || bobber.isRemoved() || !player.isAlive() || wrongWorld) {
@@ -130,10 +130,10 @@ public class FishingLootHandler {
                 fish.setPitch(fish.getPitch() + (reel.isBoosting() ? 20.0F : 5.0F));
                 bobber.setPosition(fish.getX(), fish.getY(), fish.getZ());
 
-                //? if >1.21.1 {
+                //? if >1.21.8 {
                 ServerWorld world = (ServerWorld) fish.getEntityWorld();
                 //?}
-                //? if <=1.21.1 {
+                //? if <=1.21.8 {
                 /*ServerWorld world = (ServerWorld) fish.getWorld();*/
                 //?}
                 
@@ -166,11 +166,11 @@ public class FishingLootHandler {
 
         reel.fish.discard();
         reel.bobber.discard();
-        //? if >1.21.1 {
+        //? if >1.21.8 {
         player.getEntityWorld().playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, 2.0F);
         //?}
-        //? if <=1.21.1 {
+        //? if <=1.21.8 {
         /*player.getWorld().playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, 2.0F);*/
         //?}
