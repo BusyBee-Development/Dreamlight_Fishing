@@ -1,6 +1,7 @@
 package net.busybee.ddv_fishing.networking;
 
 import net.busybee.ddv_fishing.FishingLootHandler;
+import net.busybee.ddv_fishing.mixin.FishingBobberReelAccess;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.projectile.FishingBobberEntity;
@@ -19,26 +20,22 @@ public class ModPackets {
 
     public static void registerServerHandlers() {
         ServerPlayNetworking.registerGlobalReceiver(FishingMinigameResultC2SPacket.ID, (payload, context) -> {
-            boolean success = payload.success();
             ServerPlayerEntity player = context.player();
-            context.server().execute(() -> {
-                if (success) {
-                    ItemStack fish = getRandomFish(player);
-                    FishingBobberEntity bobber = player.fishHook;
-                    
-                    if (bobber != null) {
-                        FishingLootHandler.handleCatch(player, bobber, fish, payload.isPerfect());
-                        bobber.discard();
-                    } else {
-                        if (!player.getInventory().insertStack(fish)) {
-                            player.dropItem(fish, false);
-                        }
-                    }
-                    player.sendMessage(Text.literal("Caught a fish!"), true);
-                } else {
-                    player.sendMessage(Text.literal("The fish got away..."), true);
-                }
-            });
+            FishingBobberEntity bobber = player.fishHook;
+            if (bobber == null || bobber.isRemoved() || !((FishingBobberReelAccess) bobber).ddv$consumeMinigameResult()) {
+                return;
+            }
+
+            if (!payload.success()) {
+                player.sendMessage(Text.literal("The fish got away..."), true);
+                return;
+            }
+
+            if (FishingLootHandler.startReeling(player, bobber, getRandomFish(player), payload.isPerfect())) {
+                player.sendMessage(Text.literal("Fish hooked! Reel it in."), true);
+            } else {
+                player.sendMessage(Text.literal("The fish got away..."), true);
+            }
         });
     }
 

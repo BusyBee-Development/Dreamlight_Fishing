@@ -109,6 +109,12 @@ public class FishingMinigameOverlay {
         int centerX = screenWidth / 2;
         int centerY = screenHeight / 2;
 
+        context.fill(centerX - 2, centerY - 48, centerX + 2, centerY + 48, 0xAA00FF00);
+        context.fill(centerX - 48, centerY - 2, centerX + 48, centerY + 2, 0xAA00FF00);
+        int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickProgress(false), prevRingScale, ringScale) * 32.0F);
+        int ringColor = isSafeToClick() ? 0xFF00FF00 : 0xFFFF4444;
+        drawRing(context, centerX, centerY, ringRadius, ringColor);
+
         var textRenderer = MinecraftClient.getInstance().textRenderer;
 
         context.drawCenteredTextWithShadow(textRenderer, 
@@ -141,7 +147,7 @@ public class FishingMinigameOverlay {
     }
 
     private static void renderWorldRing(net.minecraft.client.util.math.MatrixStack matrices, net.minecraft.client.render.VertexConsumerProvider vertexConsumers, float scale, float r, float g, float b, float a, Identifier texture) {
-        net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayer.getEntityTranslucent(texture));
+        net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayers.entityTranslucent(texture));
         float size = scale * 1.5f; // Adjust size for world-space
         
         net.minecraft.client.util.math.MatrixStack.Entry entry = matrices.peek();
@@ -149,10 +155,23 @@ public class FishingMinigameOverlay {
     }
 
     private static void drawQuad(net.minecraft.client.render.VertexConsumer buffer, net.minecraft.client.util.math.MatrixStack.Entry entry, float minX, float minY, float maxX, float maxY, float r, float g, float b, float a) {
-        buffer.vertex(entry.getPositionMatrix(), minX, minY, 0).color(r, g, b, a).texture(0, 0).overlay(net.minecraft.client.render.OverlayTexture.DEFAULT_UV).light(0xF000F0).normal(entry, 0, 0, 1);
-        buffer.vertex(entry.getPositionMatrix(), minX, maxY, 0).color(r, g, b, a).texture(0, 1).overlay(net.minecraft.client.render.OverlayTexture.DEFAULT_UV).light(0xF000F0).normal(entry, 0, 0, 1);
-        buffer.vertex(entry.getPositionMatrix(), maxX, maxY, 0).color(r, g, b, a).texture(1, 1).overlay(net.minecraft.client.render.OverlayTexture.DEFAULT_UV).light(0xF000F0).normal(entry, 0, 0, 1);
-        buffer.vertex(entry.getPositionMatrix(), maxX, minY, 0).color(r, g, b, a).texture(1, 0).overlay(net.minecraft.client.render.OverlayTexture.DEFAULT_UV).light(0xF000F0).normal(entry, 0, 0, 1);
+        //? if >=1.21.4 {
+        int overlay = net.minecraft.client.render.OverlayTexture.DEFAULT_UV;
+        //?} else {
+        /*int overlay = net.minecraft.client.render.OverlayTexture.DEFAULT_UV;*/
+        //?}
+        buffer.vertex(entry.getPositionMatrix(), minX, minY, 0).color(r, g, b, a).texture(0, 0).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
+        buffer.vertex(entry.getPositionMatrix(), minX, maxY, 0).color(r, g, b, a).texture(0, 1).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
+        buffer.vertex(entry.getPositionMatrix(), maxX, maxY, 0).color(r, g, b, a).texture(1, 1).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
+        buffer.vertex(entry.getPositionMatrix(), maxX, minY, 0).color(r, g, b, a).texture(1, 0).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
+    }
+
+    private static void drawRing(DrawContext context, int centerX, int centerY, int radius, int color) {
+        for (int x = -radius; x <= radius; x++) {
+            int y = Math.round((float) Math.sqrt(radius * radius - x * x));
+            context.fill(centerX + x, centerY + y, centerX + x + 1, centerY + y + 1, color);
+            context.fill(centerX + x, centerY - y, centerX + x + 1, centerY - y + 1, color);
+        }
     }
 
     public static boolean isSafeToClick() {

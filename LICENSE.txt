@@ -9,8 +9,8 @@ AUTHOR: BusyBee Development
 1. OWNERSHIP AND INTELLECTUAL PROPERTY
 The software known as Dreamlight Fishing, including but not limited to its source 
 code, compiled binaries, assets, graphics, and documentation, is the exclusive 
-intellectual property of BusyBee Development ("The Author"). All rights not 
-expressly granted in this license are reserved by the Author.
+intellectual property of BusyBee Development ("The Author").
+The Author reserves all rights not expressly granted in this license.
 
 2. GRANT OF LICENSE
 Subject to the terms of this agreement, the Author hereby grants you a 
