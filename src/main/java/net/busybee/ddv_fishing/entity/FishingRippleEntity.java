@@ -44,17 +44,17 @@ public class FishingRippleEntity extends Entity {
     }
 
     //? if >1.21.1 {
-    /*@Override
+    @Override
     public boolean damage(ServerWorld world, DamageSource source, float amount) {
         return false;
     }
-    *///?}
+    //?}
     //? if <=1.21.1 {
-    @Override
+    /*@Override
     public boolean damage(DamageSource source, float amount) {
         return false;
     }
-    //?}
+    *///?}
 
     @Override
     public void tick() {

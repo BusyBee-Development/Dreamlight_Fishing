@@ -58,11 +58,11 @@ public class FishingLootHandler {
         //?}
 
         //? if >1.21.1 {
-        /*LivingEntity fish = entityType.create(world, (f) -> {}, player.getBlockPos(), SpawnReason.EVENT, false, false);
-        *///?}
-        //? if <=1.21.1 {
-        LivingEntity fish = entityType.create(world);
+        LivingEntity fish = entityType.create(world, (f) -> {}, player.getBlockPos(), SpawnReason.EVENT, false, false);
         //?}
+        //? if <=1.21.1 {
+        /*LivingEntity fish = entityType.create(world);
+        *///?}
         if (fish == null) {
             return false;
         }
