@@ -1,57 +1,57 @@
 # Dreamlight Fishing
 
-Dreamlight Fishing is a Minecraft Fabric mod that brings the arcade-style fishing mechanics from *Disney Dreamlight Valley* into the world of Minecraft. It replaces the vanilla "wait-and-pull" fishing system with a dynamic, skill-based minigame and introduces specialized fishing spots called **Fishing Ripples**.
+Dreamlight Fishing is a Fabric mod inspired by the fishing minigame from *Disney Dreamlight Valley*. It replaces ordinary fishing with visible fishing ripples, a timing challenge, and an interactive reeling sequence.
 
 ## Features
 
-- **Fishing Ripples**: Discover unique fishing spots that appear in bodies of water.
-- **Dynamic Minigame**: A timing-based challenge that replaces the traditional fishing logic.
-- **Physical Reeling**: Caught fish are physically reeled in towards the player, flying through the air!
-- **Perfect Catches**: Precisely timed clicks reward you with "Perfect!" catches, featuring extra particles and faster reeling.
-- **Immersive Feedback**: The fishing bobber vibrates and audio cues intensify as you approach the perfect catch window.
-- **Rarity System**: Three distinct tiers of fishing spots, each with increasing difficulty and better rewards.
-
----
-
-## The World: Fishing Ripples
-
-The core of this mod revolves around the **Fishing Ripple** entity. These are magical disturbances in the water where fish congregate.
-
-### How they work:
-- **Appearance**: Fishing Ripples manifest as bubbles and disturbances on the water's surface.
-- **Rarity Levels**: 
-    - **Common (White)**: The most frequent ripples. 2 hits required.
-    - **Rare (Blue)**: Faster ripples that require 3 successful hits.
-    - **Epic (Orange)**: Rare ripples that provide the ultimate challenge with 4 fast-paced hits.
-
----
+- Fishing ripples appear naturally on exposed water near players.
+- Three ripple rarities change the speed and number of successful timings required.
+- A two-circle minigame provides visual, sound, and perfect-timing feedback.
+- Hooked fish appear in the world and resist while being reeled toward the player.
+- Successful catches award cod, salmon, tropical fish, or pufferfish.
+- Rain and thunderstorms make the timing challenge harder.
 
 ## How to Fish
 
-### 1. Find a Ripple
-Explore lakes, rivers, and oceans to find a **Fishing Ripple**. You'll see bubbles rising from the water where they are active.
+1. Look for bubbles and surface disturbances in nearby water.
+2. Cast your fishing bobber into a fishing ripple and wait for a bite.
+3. When the minigame appears, wait for the shrinking outer circle to meet the fixed inner circle.
+4. Press **Use/Right-Click** or **Attack** while the circles overlap. Repeat until every required hit is complete.
+5. Once the fish is hooked, repeatedly use the fishing rod to pull it toward you. The fish resists between pulls, and the line snaps if it gets too far away.
 
-### 2. Cast Your Line
-Cast your fishing rod so that the bobber lands within the ripple. Once it lands, wait for the fish to bite.
+An accurately timed final hit counts as a perfect catch and produces additional visual effects.
 
-### 3. The Minigame
-When a fish bites, the **Fishing Minigame** begins. You will see a shrinking ring.
+## Ripple Rarities
 
-- **Objective**: Wait for the outer ring to shrink and align with the inner "target" ring.
-- **Action**: Use your **Right-Click (or Attack)** button when the rings overlap.
-- **Perfect Catch**: If you click at the exact moment the rings align, you'll score a **Perfect Catch**!
-- **The Reel**: Once the required number of hits is met, the fish will be hooked and fly through the air toward you. Stand ready to catch it!
+- **Common:** Two successful timings at the slowest speed.
+- **Rare:** Three successful timings at a faster speed.
+- **Epic:** Four successful timings at the fastest speed.
 
----
+Rarity currently changes minigame difficulty. It does not yet provide a separate loot table.
 
-## Installation & Requirements
+## Installation
 
-- **Platform**: Fabric
-- **Versions**: Minecraft 1.21 - 1.21.11
-- **Dependencies**: 
-    - Fabric Loader (>=0.19.3)
-    - Fabric API (specifically: base, lifecycle-events-v1, networking-api-v1, rendering-v1, registry-sync-v0)
-    - Java 21+
+- Requires the Fabric mod loader, Fabric API, and Java 21.
+- Install the Dreamlight Fishing file made specifically for your exact Minecraft version.
+- Supported versions are Minecraft **1.21.1 through 1.21.11**.
+- Install the mod and Fabric API on both the server and every joining player. The client installation supplies the minigame interface, input handling, sounds, and rendering.
+
+Do not use a file for a different Minecraft release. For example, the `1.21.11` mod file will not load on a `1.21.1` game or server.
+
+## Server Owner Notes
+
+- Fishing ripples are created automatically near online players and disappear naturally over time.
+- The minigame result, reeling simulation, rod damage, line snapping, and catch rewards are controlled by the server.
+- The mod currently has no configuration file. Ripple frequency, rarity chances, reeling behavior, and loot chances use built-in defaults.
+- Vanilla fishing behavior is replaced while the mod is installed; fishing is intended to take place at generated ripples.
+- Removing or reloading the mod while a player is actively reeling may cancel that catch.
+
+## Current Limitations
+
+- Only the four vanilla fish items are available as rewards.
+- Ripple rarity does not currently affect which fish is caught.
+- Spawn rates, difficulty, loot, and reeling values cannot yet be configured by server owners.
+- There are no integrations with custom fishing loot tables or fish added by other mods yet.
 
 ## Credits
 
