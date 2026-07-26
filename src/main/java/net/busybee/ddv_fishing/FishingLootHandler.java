@@ -51,17 +51,17 @@ public class FishingLootHandler {
         }
 
         //? if >1.21.8 {
-        ServerWorld world = (ServerWorld) bobber.getEntityWorld();
-        //?}
+        /*ServerWorld world = (ServerWorld) bobber.getEntityWorld();
+        *///?}
         //? if <=1.21.8 {
-        /*ServerWorld world = (ServerWorld) bobber.getWorld();*/
+        ServerWorld world = (ServerWorld) bobber.getWorld();
         //?}
 
         //? if >1.21.1 {
-        LivingEntity fish = entityType.create(world, (f) -> {}, player.getBlockPos(), SpawnReason.EVENT, false, false);
-        //?}
+        /*LivingEntity fish = entityType.create(world, (f) -> {}, player.getBlockPos(), SpawnReason.EVENT, false, false);
+        *///?}
         //? if <=1.21.1 {
-        /*LivingEntity fish = entityType.create(world);*/
+        LivingEntity fish = entityType.create(world);
         //?}
         if (fish == null) {
             return false;
@@ -96,10 +96,10 @@ public class FishingLootHandler {
             if (reel != null && reel.bobber == bobber) {
                 reel.boosting = 8;
                 //? if >1.21.8 {
-                ServerWorld world = (ServerWorld) player.getEntityWorld();
-                //?}
+                /*ServerWorld world = (ServerWorld) player.getEntityWorld();
+                *///?}
                 //? if <=1.21.8 {
-                /*ServerWorld world = (ServerWorld) player.getWorld();*/
+                ServerWorld world = (ServerWorld) player.getWorld();
                 //?}
                 world.playSound(null, player.getX(), player.getY(), player.getZ(),
                         SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 0.25F, 1.5F);
@@ -118,10 +118,10 @@ public class FishingLootHandler {
             FishingBobberEntity bobber = reel.bobber;
 
             //? if >1.21.8 {
-            boolean wrongWorld = fish.getEntityWorld() != player.getEntityWorld();
-            //?}
+            /*boolean wrongWorld = fish.getEntityWorld() != player.getEntityWorld();
+            *///?}
             //? if <=1.21.8 {
-            /*boolean wrongWorld = fish.getWorld() != player.getWorld();*/
+            boolean wrongWorld = fish.getWorld() != player.getWorld();
             //?}
             if (fish.isRemoved() || bobber.isRemoved() || !player.isAlive() || wrongWorld) {
                 cancelReel(reel);
@@ -162,10 +162,10 @@ public class FishingLootHandler {
                 }
 
                 //? if >1.21.8 {
-                ServerWorld world = (ServerWorld) fish.getEntityWorld();
-                //?}
+                /*ServerWorld world = (ServerWorld) fish.getEntityWorld();
+                *///?}
                 //? if <=1.21.8 {
-                /*ServerWorld world = (ServerWorld) fish.getWorld();*/
+                ServerWorld world = (ServerWorld) fish.getWorld();
                 //?}
                 
                 if (reel.isBoosting() && reel.age % 2 == 0) {
@@ -218,12 +218,12 @@ public class FishingLootHandler {
         reel.fish.discard();
         reel.bobber.discard();
         //? if >1.21.8 {
-        player.getEntityWorld().playSound(null, player.getX(), player.getY(), player.getZ(),
+        /*player.getEntityWorld().playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, 2.0F);
-        //?}
+        *///?}
         //? if <=1.21.8 {
-        /*player.getWorld().playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, 2.0F);*/
+        player.getWorld().playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, 2.0F);
         //?}
         }
 

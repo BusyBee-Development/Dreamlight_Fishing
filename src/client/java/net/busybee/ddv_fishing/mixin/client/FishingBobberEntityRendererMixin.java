@@ -2,14 +2,14 @@ package net.busybee.ddv_fishing.mixin.client;
 
 import net.busybee.ddv_fishing.client.hud.FishingMinigameOverlay;
 //? if <=1.21.8 {
-/*import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-*///?}
+//?}
 import net.minecraft.client.render.entity.FishingBobberEntityRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.Mixin;
 public class FishingBobberEntityRendererMixin {
 
     //? if <=1.21.8 {
-    /*@Inject(method = "render", at = @At("HEAD"))
+    @Inject(method = "render", at = @At("HEAD"))
     private void applyVibrationAndRenderHead(FishingBobberEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
         if (FishingMinigameOverlay.isActive()) {
 
@@ -39,5 +39,5 @@ public class FishingBobberEntityRendererMixin {
             FishingMinigameOverlay.renderWorld(matrices, vertexConsumers, tickDelta);
         }
     }
-    *///?}
+    //?}
 }

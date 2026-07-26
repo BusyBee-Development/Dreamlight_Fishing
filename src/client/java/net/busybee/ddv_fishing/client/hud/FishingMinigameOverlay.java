@@ -110,9 +110,9 @@ public class FishingMinigameOverlay {
         int centerY = screenHeight / 2;
 
         //? if >=1.21.5 {
-        int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickProgress(false), prevRingScale, ringScale) * 32.0F);
-        //?} else {
-        /*int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickDelta(false), prevRingScale, ringScale) * 32.0F);*/
+        /*int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickProgress(false), prevRingScale, ringScale) * 32.0F);
+        *///?} else {
+        int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickDelta(false), prevRingScale, ringScale) * 32.0F);
         //?}
         int targetRadius = Math.round(targetScale * 32.0F);
         drawRing(context, centerX, centerY, targetRadius, 0xCCFFFFFF);
@@ -152,9 +152,9 @@ public class FishingMinigameOverlay {
 
     private static void renderWorldRing(net.minecraft.client.util.math.MatrixStack matrices, net.minecraft.client.render.VertexConsumerProvider vertexConsumers, float scale, float r, float g, float b, float a) {
         //? if >=1.21.11 {
-        net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayers.entityTranslucent(WHITE_TEXTURE));
-        //?} else {
-        /*net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayer.getEntityTranslucent(WHITE_TEXTURE));*/
+        /*net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayers.entityTranslucent(WHITE_TEXTURE));
+        *///?} else {
+        net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayer.getEntityTranslucent(WHITE_TEXTURE));
         //?}
         float outerRadius = scale * 1.5f;
         float innerRadius = Math.max(0.0f, outerRadius - 0.045f);
@@ -175,9 +175,9 @@ public class FishingMinigameOverlay {
                                         float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3,
                                         float r, float g, float b, float a) {
         //? if >=1.21.4 {
+        /*int overlay = net.minecraft.client.render.OverlayTexture.DEFAULT_UV;
+        *///?} else {
         int overlay = net.minecraft.client.render.OverlayTexture.DEFAULT_UV;
-        //?} else {
-        /*int overlay = net.minecraft.client.render.OverlayTexture.DEFAULT_UV;*/
         //?}
         buffer.vertex(entry.getPositionMatrix(), x0, y0, 0).color(r, g, b, a).texture(0, 0).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
         buffer.vertex(entry.getPositionMatrix(), x1, y1, 0).color(r, g, b, a).texture(0, 1).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
