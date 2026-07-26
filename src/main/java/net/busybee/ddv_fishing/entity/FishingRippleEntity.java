@@ -133,10 +133,10 @@ public class FishingRippleEntity extends Entity {
     @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
         //? if =1.21.5 {
-        /*setRarity(nbt.getInt("Rarity").orElse(0));
-        *///?} else {
-        setRarity(nbt.getInt("Rarity"));
-        //?}
+        setRarity(nbt.getInt("Rarity").orElse(0));
+        //?} else {
+        /*setRarity(nbt.getInt("Rarity"));
+        *///?}
     }
 
     @Override

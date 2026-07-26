@@ -110,10 +110,10 @@ public class FishingMinigameOverlay {
         int centerY = screenHeight / 2;
 
         //? if >=1.21.5 {
-        /*int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickProgress(false), prevRingScale, ringScale) * 32.0F);
-        *///?} else {
-        int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickDelta(false), prevRingScale, ringScale) * 32.0F);
-        //?}
+        int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickProgress(false), prevRingScale, ringScale) * 32.0F);
+        //?} else {
+        /*int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickDelta(false), prevRingScale, ringScale) * 32.0F);
+        *///?}
         int targetRadius = Math.round(targetScale * 32.0F);
         drawRing(context, centerX, centerY, targetRadius, 0xCCFFFFFF);
         int ringColor = isSafeToClick() ? 0xFF00FF00 : 0xFFFF4444;
