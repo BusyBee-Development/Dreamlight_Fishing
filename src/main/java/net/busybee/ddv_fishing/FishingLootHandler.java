@@ -4,6 +4,7 @@ import net.busybee.ddv_fishing.access.FishingBobberReelAccess;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.Item;
@@ -22,6 +23,13 @@ import java.util.Map;
 import java.util.UUID;
 
 public class FishingLootHandler {
+    private static final double CATCH_DISTANCE = 1.2D;
+    private static final double SNAP_DISTANCE = 24.0D;
+    private static final double RESISTANCE_SPEED = -0.015D;
+    private static final double PULL_SPEED = 0.24D;
+    private static final double MAX_SPEED = 0.28D;
+    private static final double ARRIVAL_DISTANCE = 4.0D;
+    private static final double BOBBER_CORRECTION_DISTANCE = 0.35D;
     private static final Map<Item, EntityType<? extends LivingEntity>> ITEM_TO_ENTITY = new HashMap<>();
     private static final Map<UUID, ReelState> ACTIVE_REELS = new HashMap<>();
 
@@ -63,7 +71,11 @@ public class FishingLootHandler {
         fish.setHealth(1.0F);
         fish.setInvulnerable(true);
         fish.setNoGravity(true);
+        if (fish instanceof MobEntity mob) {
+            mob.setAiDisabled(true);
+        }
         fish.setVelocity(Vec3d.ZERO);
+        bobber.setNoGravity(true);
         world.spawnEntity(fish);
 
         ACTIVE_REELS.put(player.getUuid(), new ReelState(player, bobber, fish, lootStack.copy()));
@@ -82,7 +94,7 @@ public class FishingLootHandler {
         if (bobber.getOwner() instanceof ServerPlayerEntity player) {
             ReelState reel = ACTIVE_REELS.get(player.getUuid());
             if (reel != null && reel.bobber == bobber) {
-                reel.boosting = 10;
+                reel.boosting = 8;
                 //? if >1.21.8 {
                 ServerWorld world = (ServerWorld) player.getEntityWorld();
                 //?}
@@ -117,18 +129,37 @@ public class FishingLootHandler {
                 continue;
             }
 
-            reel.tickBoost();
+            reel.tickPull();
 
             Vec3d target = new Vec3d(player.getX(), player.getY() + 1.2D, player.getZ());
             Vec3d pull = target.subtract(new Vec3d(fish.getX(), fish.getY(), fish.getZ()));
             double distance = pull.length();
 
-            if (distance > 1.2D) {
-                double speed = reel.isBoosting() ? 0.4D : -0.02D;
-                fish.setVelocity(pull.normalize().multiply(speed));
-                fish.setYaw(fish.getYaw() + (reel.isBoosting() ? 40.0F : 10.0F));
-                fish.setPitch(fish.getPitch() + (reel.isBoosting() ? 20.0F : 5.0F));
-                bobber.setPosition(fish.getX(), fish.getY(), fish.getZ());
+            if (distance > CATCH_DISTANCE) {
+                Vec3d direction = pull.normalize();
+                double desiredSpeed = RESISTANCE_SPEED + (PULL_SPEED - RESISTANCE_SPEED) * reel.pullStrength;
+                if (desiredSpeed > 0.0D && distance < ARRIVAL_DISTANCE) {
+                    desiredSpeed *= Math.max(0.2D, (distance - CATCH_DISTANCE) / (ARRIVAL_DISTANCE - CATCH_DISTANCE));
+                }
+
+                Vec3d desiredVelocity = direction.multiply(desiredSpeed);
+                Vec3d currentVelocity = fish.getVelocity();
+                Vec3d nextVelocity = currentVelocity.multiply(0.72D).add(desiredVelocity.multiply(0.28D));
+                if (nextVelocity.lengthSquared() > MAX_SPEED * MAX_SPEED) {
+                    nextVelocity = nextVelocity.normalize().multiply(MAX_SPEED);
+                }
+
+                fish.setVelocity(nextVelocity);
+                updateFishRotation(fish, nextVelocity);
+
+                bobber.setVelocity(nextVelocity);
+                double bobberDx = bobber.getX() - fish.getX();
+                double bobberDy = bobber.getY() - fish.getY();
+                double bobberDz = bobber.getZ() - fish.getZ();
+                if (bobberDx * bobberDx + bobberDy * bobberDy + bobberDz * bobberDz
+                        > BOBBER_CORRECTION_DISTANCE * BOBBER_CORRECTION_DISTANCE) {
+                    bobber.setPosition(fish.getX(), fish.getY(), fish.getZ());
+                }
 
                 //? if >1.21.8 {
                 ServerWorld world = (ServerWorld) fish.getEntityWorld();
@@ -137,13 +168,13 @@ public class FishingLootHandler {
                 /*ServerWorld world = (ServerWorld) fish.getWorld();*/
                 //?}
                 
-                if (reel.isBoosting()) {
+                if (reel.isBoosting() && reel.age % 2 == 0) {
                     world.spawnParticles(ParticleTypes.SPLASH, fish.getX(), fish.getY(), fish.getZ(), 3, 0.1, 0.1, 0.1, 0.05);
-                } else {
+                } else if (reel.age % 4 == 0) {
                     world.spawnParticles(ParticleTypes.BUBBLE, fish.getX(), fish.getY(), fish.getZ(), 1, 0.1, 0.1, 0.1, 0.01);
                 }
                 
-                if (distance > 24.0D) { // Too far!
+                if (distance > SNAP_DISTANCE) {
                     player.sendMessage(net.minecraft.text.Text.literal("The line snapped!"), true);
                     cancelReel(reel);
                     iterator.remove();
@@ -154,9 +185,29 @@ public class FishingLootHandler {
             awardCatch(reel);
             iterator.remove();
         }
+    }
+
+    private static void updateFishRotation(LivingEntity fish, Vec3d velocity) {
+        double horizontalSpeed = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+        if (horizontalSpeed < 0.001D && Math.abs(velocity.y) < 0.001D) {
+            return;
         }
 
-        private static void awardCatch(ReelState reel) {
+        float targetYaw = (float) (Math.atan2(-velocity.x, velocity.z) * 180.0D / Math.PI);
+        float targetPitch = (float) (Math.atan2(-velocity.y, Math.max(0.001D, horizontalSpeed)) * 180.0D / Math.PI);
+        targetPitch = Math.max(-25.0F, Math.min(25.0F, targetPitch));
+        fish.setYaw(fish.getYaw() + wrapDegrees(targetYaw - fish.getYaw()) * 0.25F);
+        fish.setPitch(fish.getPitch() + (targetPitch - fish.getPitch()) * 0.2F);
+    }
+
+    private static float wrapDegrees(float degrees) {
+        float wrapped = degrees % 360.0F;
+        if (wrapped >= 180.0F) wrapped -= 360.0F;
+        if (wrapped < -180.0F) wrapped += 360.0F;
+        return wrapped;
+    }
+
+    private static void awardCatch(ReelState reel) {
         ServerPlayerEntity player = reel.player;
         ItemStack loot = reel.lootStack;
 
@@ -179,6 +230,7 @@ public class FishingLootHandler {
     private static void cancelReel(ReelState reel) {
         reel.fish.discard();
         if (!reel.bobber.isRemoved()) {
+            reel.bobber.setNoGravity(false);
             ((FishingBobberReelAccess) reel.bobber).ddv$setReeling(false);
         }
     }
@@ -200,6 +252,8 @@ public class FishingLootHandler {
         final LivingEntity fish;
         final ItemStack lootStack;
         int boosting;
+        int age;
+        double pullStrength;
 
         ReelState(ServerPlayerEntity player, FishingBobberEntity bobber, LivingEntity fish, ItemStack lootStack) {
             this.player = player;
@@ -209,6 +263,12 @@ public class FishingLootHandler {
         }
 
         boolean isBoosting() { return boosting > 0; }
-        void tickBoost() { if (boosting > 0) boosting--; }
+        void tickPull() {
+            age++;
+            double targetStrength = isBoosting() ? 1.0D : 0.0D;
+            double easing = isBoosting() ? 0.25D : 0.12D;
+            pullStrength += (targetStrength - pullStrength) * easing;
+            if (boosting > 0) boosting--;
+        }
     }
 }
