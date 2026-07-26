@@ -60,11 +60,11 @@ public class FishingRippleEntity extends Entity {
     public void tick() {
         super.tick();
         //? if >1.21.8 {
-        /*World world = this.getEntityWorld();
-        *///?}
-        //? if <=1.21.8 {
-        World world = this.getWorld();
+        World world = this.getEntityWorld();
         //?}
+        //? if <=1.21.8 {
+        /*World world = this.getWorld();
+        *///?}
         if (world instanceof ServerWorld serverWorld) {
             if (this.age > maxAge) {
                 this.discard();
