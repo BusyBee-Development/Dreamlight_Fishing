@@ -175,10 +175,10 @@ public class FishingMinigameOverlay {
                                         float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3,
                                         float r, float g, float b, float a) {
         //? if >=1.21.4 {
-        /*int overlay = net.minecraft.client.render.OverlayTexture.DEFAULT_UV;
-        *///?} else {
         int overlay = net.minecraft.client.render.OverlayTexture.DEFAULT_UV;
-        //?}
+        //?} else {
+        /*int overlay = net.minecraft.client.render.OverlayTexture.DEFAULT_UV;
+        *///?}
         buffer.vertex(entry.getPositionMatrix(), x0, y0, 0).color(r, g, b, a).texture(0, 0).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
         buffer.vertex(entry.getPositionMatrix(), x1, y1, 0).color(r, g, b, a).texture(0, 1).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
         buffer.vertex(entry.getPositionMatrix(), x2, y2, 0).color(r, g, b, a).texture(1, 1).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
