@@ -24,7 +24,7 @@ public class FishingBobberEntityRendererMixin {
 
     //? if >=1.21.2 {
     //? if <1.21.11 {
-    @Inject(method = "render", at = @At("TAIL"))
+    /*@Inject(method = "render", at = @At("TAIL"))
     private void renderMinigameTailModern(@org.spongepowered.asm.mixin.injection.Coerce Object state, MatrixStack matrices, @org.spongepowered.asm.mixin.injection.Coerce Object vertexConsumers, int light, CallbackInfo ci) {
         if (FishingMinigameOverlay.isActive()) {
             VertexConsumerProvider provider;
@@ -36,11 +36,11 @@ public class FishingBobberEntityRendererMixin {
             FishingMinigameOverlay.renderWorld(matrices, provider, 0);
         }
     }
-    //?}
+    *///?}
     //?}
 
     //? if >=1.21.11 {
-    /*@Inject(method = "render", at = @At("TAIL"))
+    @Inject(method = "render", at = @At("TAIL"))
     private void renderMinigameTailLatest(@org.spongepowered.asm.mixin.injection.Coerce Object state, MatrixStack matrices, @org.spongepowered.asm.mixin.injection.Coerce Object vertexConsumers, @org.spongepowered.asm.mixin.injection.Coerce Object cameraState, CallbackInfo ci) {
         if (FishingMinigameOverlay.isActive()) {
             VertexConsumerProvider provider;
@@ -52,13 +52,13 @@ public class FishingBobberEntityRendererMixin {
 
             float tickDelta = 0;
             //? if >=1.21.5 {
-            /^tickDelta = net.minecraft.client.MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false);
-            ^///?} else {
-            tickDelta = net.minecraft.client.MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(false);
-            //?}
+            tickDelta = net.minecraft.client.MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false);
+            //?} else {
+            /*tickDelta = net.minecraft.client.MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(false);
+            *///?}
 
             FishingMinigameOverlay.renderWorld(matrices, provider, tickDelta);
         }
     }
-    *///?}
+    //?}
 }

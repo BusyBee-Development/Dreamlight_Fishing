@@ -144,10 +144,10 @@ public class FishingMinigameOverlay {
 
     private static void renderWorldRing(net.minecraft.client.util.math.MatrixStack matrices, net.minecraft.client.render.VertexConsumerProvider vertexConsumers, float scale, float r, float g, float b, float a) {
         //? if >=1.21.11 {
-        /*net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayers.entityTranslucent(WHITE_TEXTURE));
-        *///?} else {
-        net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayer.getEntityTranslucent(WHITE_TEXTURE));
-        //?}
+        net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayers.entityTranslucent(WHITE_TEXTURE));
+        //?} else {
+        /*net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayer.getEntityTranslucent(WHITE_TEXTURE));
+        *///?}
         float outerRadius = scale; 
         float innerRadius = Math.max(0.0f, outerRadius - 0.1f); // Thicker ring
         net.minecraft.client.util.math.MatrixStack.Entry entry = matrices.peek();
