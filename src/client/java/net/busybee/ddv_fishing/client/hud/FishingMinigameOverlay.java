@@ -69,7 +69,6 @@ public class FishingMinigameOverlay {
         }
         if (swingTicker > 0) swingTicker--;
         
-        // Feature A: Dynamic Audio Feedback
         float diff = Math.abs(ringScale - targetScale);
         if (ringScale > targetScale && diff < 0.6f && diff > 0.12f) {
             int soundInterval = (int) (diff * 15);
@@ -109,16 +108,6 @@ public class FishingMinigameOverlay {
         int centerX = screenWidth / 2;
         int centerY = screenHeight / 2;
 
-        //? if >=1.21.5 {
-        int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickProgress(false), prevRingScale, ringScale) * 32.0F);
-        //?} else {
-        /*int ringRadius = Math.round(MathHelper.lerp(tickCounter.getTickDelta(false), prevRingScale, ringScale) * 32.0F);
-        *///?}
-        int targetRadius = Math.round(targetScale * 32.0F);
-        drawRing(context, centerX, centerY, targetRadius, 0xCCFFFFFF);
-        int ringColor = isSafeToClick() ? 0xFF00FF00 : 0xFFFF4444;
-        drawRing(context, centerX, centerY, ringRadius, ringColor);
-
         var textRenderer = MinecraftClient.getInstance().textRenderer;
 
         context.drawCenteredTextWithShadow(textRenderer, 
@@ -127,7 +116,6 @@ public class FishingMinigameOverlay {
         String instruction = isSafeToClick() ? "CLICK NOW!" : "Wait for it...";
         int instructionColor = isSafeToClick() ? 0xFF00FF00 : 0xFFFFFFFF;
         context.drawCenteredTextWithShadow(textRenderer, instruction, centerX, centerY + 115, instructionColor);
-
     }
 
     public static void renderWorld(net.minecraft.client.util.math.MatrixStack matrices, net.minecraft.client.render.VertexConsumerProvider vertexConsumers, float tickDelta) {
@@ -136,14 +124,18 @@ public class FishingMinigameOverlay {
         float currentScale = MathHelper.lerp(tickDelta, prevRingScale, ringScale);
         
         matrices.push();
-        matrices.translate(0, 0.1, 0);
+        matrices.translate(0, 0.05, 0); // Slightly above water
         matrices.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_X.rotationDegrees(90));
 
-        renderWorldRing(matrices, vertexConsumers, targetScale, 1.0f, 1.0f, 1.0f, 0.65f);
+        // Target Ring (Gold/Yellow)
+        renderWorldRing(matrices, vertexConsumers, targetScale, 1.0f, 0.84f, 0.0f, 0.8f);
 
-        float r = 1.0f, g = 1.0f, b = 1.0f;
-        if (Math.abs(currentScale - targetScale) > 0.12f) {
-            r = 1.0f; g = 0.2f; b = 0.2f; // Reddish if outside
+        // Closing Ring (Green if safe, Red otherwise)
+        float r, g, b;
+        if (isSafeToClick()) {
+            r = 0.0f; g = 1.0f; b = 0.0f;
+        } else {
+            r = 1.0f; g = 0.2f; b = 0.2f;
         }
         renderWorldRing(matrices, vertexConsumers, currentScale, r, g, b, 0.9f);
         
@@ -156,8 +148,8 @@ public class FishingMinigameOverlay {
         //?} else {
         /*net.minecraft.client.render.VertexConsumer buffer = vertexConsumers.getBuffer(net.minecraft.client.render.RenderLayer.getEntityTranslucent(WHITE_TEXTURE));
         *///?}
-        float outerRadius = scale * 1.5f;
-        float innerRadius = Math.max(0.0f, outerRadius - 0.045f);
+        float outerRadius = scale; 
+        float innerRadius = Math.max(0.0f, outerRadius - 0.1f); // Thicker ring
         net.minecraft.client.util.math.MatrixStack.Entry entry = matrices.peek();
         for (int segment = 0; segment < RING_SEGMENTS; segment++) {
             double angle0 = Math.PI * 2.0 * segment / RING_SEGMENTS;
@@ -174,25 +166,11 @@ public class FishingMinigameOverlay {
     private static void drawRingSegment(net.minecraft.client.render.VertexConsumer buffer, net.minecraft.client.util.math.MatrixStack.Entry entry,
                                         float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3,
                                         float r, float g, float b, float a) {
-        //? if >=1.21.4 {
         int overlay = net.minecraft.client.render.OverlayTexture.DEFAULT_UV;
-        //?} else {
-        /*int overlay = net.minecraft.client.render.OverlayTexture.DEFAULT_UV;
-        *///?}
         buffer.vertex(entry.getPositionMatrix(), x0, y0, 0).color(r, g, b, a).texture(0, 0).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
         buffer.vertex(entry.getPositionMatrix(), x1, y1, 0).color(r, g, b, a).texture(0, 1).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
         buffer.vertex(entry.getPositionMatrix(), x2, y2, 0).color(r, g, b, a).texture(1, 1).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
         buffer.vertex(entry.getPositionMatrix(), x3, y3, 0).color(r, g, b, a).texture(1, 0).overlay(overlay).light(0xF000F0).normal(entry, 0, 0, 1);
-    }
-
-    private static void drawRing(DrawContext context, int centerX, int centerY, int radius, int color) {
-        int segments = Math.max(32, radius * 4);
-        for (int segment = 0; segment < segments; segment++) {
-            double angle = Math.PI * 2.0 * segment / segments;
-            int x = centerX + Math.round((float) Math.cos(angle) * radius);
-            int y = centerY + Math.round((float) Math.sin(angle) * radius);
-            context.fill(x - 1, y - 1, x + 1, y + 1, color);
-        }
     }
 
     public static boolean isSafeToClick() {

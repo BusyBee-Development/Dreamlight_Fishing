@@ -1,12 +1,10 @@
 package net.busybee.ddv_fishing.mixin;
 
 import net.busybee.ddv_fishing.access.FishingBobberReelAccess;
-import net.busybee.ddv_fishing.FishingLootHandler;
 import net.busybee.ddv_fishing.entity.FishingRippleEntity;
 import net.busybee.ddv_fishing.networking.FishingMinigameS2CPacket;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -15,7 +13,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
@@ -28,20 +25,9 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
     @Unique
     private boolean minigameActive;
 
-    @Unique
-    private boolean reeling;
-
     @Inject(method = "tickFishingLogic", at = @At("HEAD"), cancellable = true)
     private void onTickFishing(BlockPos pos, CallbackInfo ci) {
         ci.cancel();
-    }
-
-    @Inject(method = "use", at = @At("HEAD"), cancellable = true)
-    private void onUse(ItemStack usedItem, CallbackInfoReturnable<Integer> cir) {
-        if (this.reeling) {
-            FishingLootHandler.boost((FishingBobberEntity) (Object) this);
-            cir.setReturnValue(0);
-        }
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
@@ -52,7 +38,7 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
         //?} else {
         /*World world = bobber.getWorld();
         *///?}
-        if (world.isClient() || this.minigameActive || this.reeling || bobber.getHookedEntity() != null || bobber.isRemoved()) return;
+        if (world.isClient() || this.minigameActive || bobber.getHookedEntity() != null || bobber.isRemoved()) return;
 
         List<FishingRippleEntity> ripples = world.getEntitiesByClass(
                 FishingRippleEntity.class,
@@ -104,15 +90,5 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
         this.minigameActive = false;
         this.rippleBiteDelay = -1;
         return true;
-    }
-
-    @Override
-    public boolean ddv$isReeling() {
-        return this.reeling;
-    }
-
-    @Override
-    public void ddv$setReeling(boolean reeling) {
-        this.reeling = reeling;
     }
 }

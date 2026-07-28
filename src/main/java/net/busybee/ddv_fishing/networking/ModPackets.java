@@ -31,11 +31,9 @@ public class ModPackets {
                 return;
             }
 
-            if (FishingLootHandler.startReeling(player, bobber, getRandomFish(player), payload.isPerfect())) {
-                player.sendMessage(Text.literal("Fish hooked! Reel it in."), true);
-            } else {
-                player.sendMessage(Text.literal("The fish got away..."), true);
-            }
+            ItemStack loot = getRandomFish(player);
+            FishingLootHandler.catchFish(player, bobber, loot, payload.isPerfect());
+            player.sendMessage(Text.literal("Caught a " + loot.getName().getString() + "!"), true);
         });
     }
 
