@@ -23,7 +23,7 @@ public class FishingBobberEntityRendererMixin {
     //?} */
 
     //? if >=1.21.2 {
-    /*//? if <1.21.11 {
+    //? if <1.21.11 {
     @Inject(method = "render", at = @At("TAIL"))
     private void renderMinigameTailModern(@org.spongepowered.asm.mixin.injection.Coerce Object state, MatrixStack matrices, @org.spongepowered.asm.mixin.injection.Coerce Object vertexConsumers, int light, CallbackInfo ci) {
         if (FishingMinigameOverlay.isActive()) {
@@ -37,7 +37,7 @@ public class FishingBobberEntityRendererMixin {
         }
     }
     //?}
-    *///?}
+    //?}
 
     //? if >=1.21.11 {
     /*@Inject(method = "render", at = @At("TAIL"))
