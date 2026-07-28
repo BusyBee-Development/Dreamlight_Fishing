@@ -7,12 +7,12 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 //? if >1.21.5 {
-/*import net.minecraft.storage.ReadView;
+import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
-*///?}
-//? if <=1.21.5 {
-import net.minecraft.nbt.NbtCompound;
 //?}
+//? if <=1.21.5 {
+/*import net.minecraft.nbt.NbtCompound;
+*///?}
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.server.world.ServerWorld;
@@ -119,7 +119,7 @@ public class FishingRippleEntity extends Entity {
     }
 
     //? if >1.21.5 {
-    /*@Override
+    @Override
     protected void readCustomData(ReadView view) {
         setRarity(view.getInt("Rarity", 0));
     }
@@ -128,20 +128,20 @@ public class FishingRippleEntity extends Entity {
     protected void writeCustomData(WriteView view) {
         view.putInt("Rarity", getRarity());
     }
-    *///?}
+    //?}
     //? if <=1.21.5 {
-    @Override
+    /*@Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
         //? if =1.21.5 {
-        setRarity(nbt.getInt("Rarity").orElse(0));
-        //?} else {
-        /*setRarity(nbt.getInt("Rarity"));
-        *///?}
+        /^setRarity(nbt.getInt("Rarity").orElse(0));
+        ^///?} else {
+        setRarity(nbt.getInt("Rarity"));
+        //?}
     }
 
     @Override
     protected void writeCustomDataToNbt(NbtCompound nbt) {
         nbt.putInt("Rarity", getRarity());
     }
-    //?}
+    *///?}
 }
