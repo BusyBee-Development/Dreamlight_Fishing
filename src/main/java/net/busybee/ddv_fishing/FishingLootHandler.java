@@ -14,10 +14,10 @@ public class FishingLootHandler {
 
     public static void catchFish(ServerPlayerEntity player, FishingBobberEntity bobber, ItemStack lootStack, boolean isPerfect) {
         //? if >1.21.8 {
-        ServerWorld world = (ServerWorld) bobber.getEntityWorld();
-        //?} else {
-        /*ServerWorld world = (ServerWorld) bobber.getWorld();
-        *///?}
+        /*ServerWorld world = (ServerWorld) bobber.getEntityWorld();
+        *///?} else {
+        ServerWorld world = (ServerWorld) bobber.getWorld();
+        //?}
 
         if (!player.getInventory().insertStack(lootStack)) {
             player.dropItem(lootStack, false);

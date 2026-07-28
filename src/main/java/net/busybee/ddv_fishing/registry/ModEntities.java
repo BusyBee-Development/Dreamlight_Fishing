@@ -16,19 +16,19 @@ public class ModEntities {
     public static final EntityType<FishingRippleEntity> FISHING_RIPPLE = Registry.register(
             Registries.ENTITY_TYPE,
             //? if >1.21.1 {
-            FISHING_RIPPLE_KEY,
-            //?}
-            //? if <=1.21.1 {
-             /*RIPPLE_ID, 
+            /*FISHING_RIPPLE_KEY,
             *///?}
+            //? if <=1.21.1 {
+             RIPPLE_ID, 
+            //?}
             EntityType.Builder.create(FishingRippleEntity::new, SpawnGroup.MISC)
                     .dimensions(2.0f, 0.5f)
                     //? if >1.21.1 {
-                    .build(FISHING_RIPPLE_KEY)
-                    //?}
-                    //? if <=1.21.1 {
-                    /*.build()
+                    /*.build(FISHING_RIPPLE_KEY)
                     *///?}
+                    //? if <=1.21.1 {
+                    .build()
+                    //?}
     );
 
     public static void register() {
