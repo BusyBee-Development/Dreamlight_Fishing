@@ -4,7 +4,7 @@ plugins {
     id("dev.kikugie.stonecutter")
 }
 
-val mod_version = project.property("mod_version") as String
+val mod_revision = project.property("mod_revision") as String
 val maven_group = project.property("maven_group") as String
 val archives_base_name = project.property("archives_base_name") as String
 val minecraft_version = project.property("minecraft_version") as String
@@ -12,7 +12,7 @@ val yarn_mappings = project.property("yarn_mappings") as String
 val loader_version = project.property("loader_version") as String
 val fabric_version = project.property("fabric_version") as String
 
-version = mod_version
+version = "$minecraft_version-$mod_revision"
 group = maven_group
 
 base {
