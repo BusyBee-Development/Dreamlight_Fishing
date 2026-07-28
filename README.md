@@ -62,6 +62,7 @@ Once hooked, the fish appears in the water!
 ---
 
 ## 🖥️ Server Owner Notes
+**Note:** Server side is still in Beta.
 
 *   **Dual Installation:** Required on both **Server** and **Client**. The client provides the minigame UI, rendering, input handling, and audio.
 *   **Server Authority:** Minigame outcomes, physical reeling physics, rod durability wear, line snapping, and loot delivery are fully managed server-side.
@@ -74,6 +75,26 @@ Once hooked, the fish appears in the water!
 
 *   **Loot:** Currently awards the four vanilla fish items (Cod, Salmon, Tropical Fish, Pufferfish).
 *   **Integrations:** No config file, custom loot table hooks, or external modded fish support available yet.
+*  **Custom Textures:** We plan on adding in more fish, custom fishing poles, animations and sounds in the future as well.
+
+---
+
+## 🤝 Want to Contribute?
+
+**Dreamlight Fishing** is an evolving project, and contributions, feedback, and ideas from the community are always welcome! Whether you are a programmer, artist, translator, or player, here is how you can help move the project forward:
+
+### 🛠️ Ways You Can Help
+*   **🐛 Report Bugs:** Found an issue, crash, or unexpected behavior? Open an issue on our tracker with your game version, mod list, and crash logs.
+*   **💡 Feature Ideas:** Have a suggestion for future updates (like config options, custom loot tables, or mod integrations)? We'd love to hear it!
+*   **💻 Code & Pull Requests:** Feel free to fork the repository and submit PRs for bug fixes, code optimizations, or new features.
+*   **🎨 Assets & Audio:** Sound design and visual FX contributions to make the minigame feel even smoother are always appreciated.
+
+### 📜 Getting Started
+1. **Fork & Clone:** Fork the repository and clone it to your local environment.
+2. **Environment:** Ensure you are set up with **Java 21** and a Fabric-compatible IDE (IntelliJ IDEA recommended).
+3. **Submit a PR:** Keep changes focused, follow standard Java conventions, and test thoroughly across supported Minecraft versions before submitting!
+
+*For quick discussions, dev builds, and support tickets, join our **[Discord Server](https://discord.com/invite/abdm29q7af)**!*
 
 ---
 
