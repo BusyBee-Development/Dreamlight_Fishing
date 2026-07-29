@@ -81,7 +81,8 @@ public class FishingRippleEntity extends Entity {
 
     private void spawnParticles(ServerWorld serverWorld) {
         if (this.age % 2 == 0) {
-            int count = switch (getRarity()) {
+            int rarity = getRarity();
+            int count = switch (rarity) {
                 case 1 -> 4;
                 case 2 -> 7;
                 default -> 2;
@@ -109,13 +110,18 @@ public class FishingRippleEntity extends Entity {
                 if (i % 2 == 0) {
                     serverWorld.spawnParticles(ParticleTypes.FISHING, this.getX() + dx * 0.7, this.getY(), this.getZ() + dz * 0.7, 1, 0, 0, 0, 0.02);
                 }
+
+                if (rarity == 1) {
+                    serverWorld.spawnParticles(ParticleTypes.WAX_ON, this.getX() + dx, this.getY() + 0.1, this.getZ() + dz, 1, 0, 0, 0, 0);
+                } else if (rarity == 2) {
+                    serverWorld.spawnParticles(ParticleTypes.GLOW, this.getX() + dx, this.getY() + 0.1, this.getZ() + dz, 1, 0, 0, 0, 0);
+                }
             }
 
-            if (getRarity() > 0) {
-                serverWorld.spawnParticles(ParticleTypes.SPLASH, this.getX(), this.getY(), this.getZ(), getRarity(), 0.3, 0.0, 0.3, 0.0);
+            if (rarity > 0) {
+                serverWorld.spawnParticles(ParticleTypes.SPLASH, this.getX(), this.getY(), this.getZ(), rarity * 3, 0.4, 0.0, 0.4, 0.0);
             }
         }
-        return; // Skip old logic
     }
 
     //? if >1.21.5 {

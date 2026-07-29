@@ -26,6 +26,7 @@ public class FishingMinigameOverlay {
     private static int soundTicker = 0;
     private static int swingTicker = 0;
     private static boolean chimePlayed = false;
+    private static int postMinigameCooldown = 0;
 
     public static void start(int hits, float difficultySpeed) {
         active = true;
@@ -51,6 +52,10 @@ public class FishingMinigameOverlay {
     }
 
     public static void tick() {
+        if (postMinigameCooldown > 0) {
+            postMinigameCooldown--;
+        }
+
         if (!active) return;
 
         if (actionCooldown > 0) {
@@ -202,16 +207,22 @@ public class FishingMinigameOverlay {
 
     private static void win(boolean isPerfect) {
         active = false;
+        postMinigameCooldown = 10;
         ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(true, isPerfect));
     }
 
     private static void fail() {
         active = false;
+        postMinigameCooldown = 10;
         ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(false, false));
     }
 
     public static boolean isActive() {
         return active;
+    }
+
+    public static boolean isRecentlyActive() {
+        return active || postMinigameCooldown > 0;
     }
 
     public static float getTargetDiff() {

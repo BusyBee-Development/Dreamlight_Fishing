@@ -6,9 +6,11 @@ import net.busybee.ddv_fishing.world.RippleSpawner;
 import net.fabricmc.api.ModInitializer;
 
 public class Ddv_fishing implements ModInitializer {
+    public static ModConfig CONFIG;
 
     @Override
     public void onInitialize() {
+        CONFIG = ModConfig.load();
         ModEntities.register();
         ModPackets.registerPayloads();
         ModPackets.registerServerHandlers();

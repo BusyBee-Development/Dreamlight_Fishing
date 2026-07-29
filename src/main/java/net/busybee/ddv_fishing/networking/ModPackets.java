@@ -28,21 +28,19 @@ public class ModPackets {
 
             if (!payload.success()) {
                 player.sendMessage(Text.literal("The fish got away..."), true);
+                bobber.discard();
+                player.fishHook = null;
                 return;
             }
 
-            ItemStack loot = getRandomFish(player);
+            int rarity = ((FishingBobberReelAccess) bobber).ddv$getRarity();
+            ItemStack loot = FishingLootHandler.generateLoot(player, bobber, rarity);
+            Text lootName = loot.getName();
             FishingLootHandler.catchFish(player, bobber, loot, payload.isPerfect());
-            player.sendMessage(Text.literal("Caught a " + loot.getName().getString() + "!"), true);
+            player.fishHook = null;
+            
+            String prefix = payload.isPerfect() ? "Perfect Catch! Caught a " : "Caught a ";
+            player.sendMessage(Text.literal(prefix).append(lootName).append("!"), true);
         });
     }
-
-    private static ItemStack getRandomFish(ServerPlayerEntity player) {
-        float r = player.getRandom().nextFloat();
-        if (r < 0.1f) return new ItemStack(Items.PUFFERFISH);
-        if (r < 0.25f) return new ItemStack(Items.TROPICAL_FISH);
-        if (r < 0.5f) return new ItemStack(Items.SALMON);
-        return new ItemStack(Items.COD);
-    }
-
 }

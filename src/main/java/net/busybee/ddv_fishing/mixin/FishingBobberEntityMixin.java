@@ -25,6 +25,9 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
     @Unique
     private boolean minigameActive;
 
+    @Unique
+    private int rippleRarity = 0;
+
     @Inject(method = "tickFishingLogic", at = @At("HEAD"), cancellable = true)
     private void onTickFishing(BlockPos pos, CallbackInfo ci) {
         ci.cancel();
@@ -66,6 +69,7 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
     private void startMinigame(FishingBobberEntity bobber, FishingRippleEntity ripple) {
         if (bobber.getOwner() instanceof ServerPlayerEntity player) {
             this.minigameActive = true;
+            this.rippleRarity = ripple.getRarity();
             int hits = switch (ripple.getRarity()) {
                 case 1 -> 3;
                 case 2 -> 4;
@@ -75,7 +79,7 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
                 case 1 -> 0.035f;
                 case 2 -> 0.05f;
                 default -> 0.025f;
-            };
+            } * net.busybee.ddv_fishing.Ddv_fishing.CONFIG.minigame_difficulty_multiplier;
 
             ServerPlayNetworking.send(player, new FishingMinigameS2CPacket(hits, speed));
         }
@@ -90,5 +94,15 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
         this.minigameActive = false;
         this.rippleBiteDelay = -1;
         return true;
+    }
+
+    @Override
+    public int ddv$getRarity() {
+        return this.rippleRarity;
+    }
+
+    @Override
+    public void ddv$setRarity(int rarity) {
+        this.rippleRarity = rarity;
     }
 }

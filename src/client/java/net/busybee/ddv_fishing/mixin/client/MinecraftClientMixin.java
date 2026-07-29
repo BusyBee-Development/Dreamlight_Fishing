@@ -13,16 +13,20 @@ public abstract class MinecraftClientMixin {
 
     @Inject(method = "doItemUse", at = @At("HEAD"), cancellable = true)
     private void onDoItemUse(CallbackInfo ci) {
-        if (FishingMinigameOverlay.isActive()) {
-            FishingMinigameOverlay.onAction();
+        if (FishingMinigameOverlay.isRecentlyActive()) {
+            if (FishingMinigameOverlay.isActive()) {
+                FishingMinigameOverlay.onAction();
+            }
             ci.cancel();
         }
     }
 
     @Inject(method = "doAttack", at = @At("HEAD"), cancellable = true)
     private void onDoAttack(CallbackInfoReturnable<Boolean> cir) {
-        if (FishingMinigameOverlay.isActive()) {
-            FishingMinigameOverlay.onAction();
+        if (FishingMinigameOverlay.isRecentlyActive()) {
+            if (FishingMinigameOverlay.isActive()) {
+                FishingMinigameOverlay.onAction();
+            }
             cir.setReturnValue(false);
         }
     }
