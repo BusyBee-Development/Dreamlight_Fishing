@@ -1,5 +1,5 @@
 package net.busybee.ddv_fishing;
-    
+
 import net.busybee.ddv_fishing.access.FishingBobberReelAccess;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.Item;
@@ -26,13 +26,14 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import java.util.List;
+import java.util.ArrayList;
 
 public class FishingLootHandler {
 
     private static final TagKey<Item> C_FISHING_RODS = TagKey.of(RegistryKeys.ITEM, Identifier.of("c", "fishing_rods"));
     private static final TagKey<Item> FABRIC_FISHING_RODS = TagKey.of(RegistryKeys.ITEM, Identifier.of("fabric", "fishing_rods"));
 
-    public static ItemStack generateLoot(ServerPlayerEntity player, FishingBobberEntity bobber, int rarity) {
+    public static List<ItemStack> generateLoot(ServerPlayerEntity player, FishingBobberEntity bobber, int rarity) {
         //? if >1.21.8 {
         ServerWorld world = (ServerWorld) bobber.getEntityWorld();
         //?} else {
@@ -48,50 +49,53 @@ public class FishingLootHandler {
         //? if >1.21.1 {
         LootWorldContext parameterSet = new LootWorldContext.Builder(world)
                 .add(LootContextParameters.ORIGIN, new Vec3d(bobber.getX(), bobber.getY(), bobber.getZ()))
-                .add(LootContextParameters.TOOL, player.getMainHandStack())
+                .add(LootContextParameters.TOOL, getFishingRod(player))
                 .add(LootContextParameters.THIS_ENTITY, bobber)
                 .luck(player.getLuck())
                 .build(LootContextTypes.FISHING);
         //?} else {
         /*LootContextParameterSet parameterSet = new LootContextParameterSet.Builder(world)
                 .add(LootContextParameters.ORIGIN, new Vec3d(bobber.getX(), bobber.getY(), bobber.getZ()))
-                .add(LootContextParameters.TOOL, player.getMainHandStack())
+                .add(LootContextParameters.TOOL, getFishingRod(player))
                 .add(LootContextParameters.THIS_ENTITY, bobber)
                 .luck(player.getLuck())
                 .build(LootContextTypes.FISHING);
         *///?}
 
         LootTable lootTable = world.getServer().getReloadableRegistries().getLootTable(RegistryKey.of(RegistryKeys.LOOT_TABLE, lootTableId));
+        
         //? if >1.21.1 {
         List<ItemStack> loot = lootTable.generateLoot(parameterSet);
         //?} else {
         /*List<ItemStack> loot = lootTable.generateLoot(parameterSet);
         *///?}
 
-        if (loot.isEmpty() || loot.get(0).isEmpty()) {
-            return new ItemStack(Items.COD);
+        if (loot.isEmpty()) {
+            List<ItemStack> fallback = new ArrayList<>();
+            fallback.add(new ItemStack(Items.COD));
+            return fallback;
         }
-        return loot.get(0).copy();
+        return loot;
     }
 
-    public static void catchFish(ServerPlayerEntity player, FishingBobberEntity bobber, ItemStack lootStack, boolean isPerfect) {
+    public static void catchFish(ServerPlayerEntity player, FishingBobberEntity bobber, List<ItemStack> lootItems, boolean isPerfect) {
         //? if >1.21.8 {
         ServerWorld world = (ServerWorld) bobber.getEntityWorld();
         //?} else {
         /*ServerWorld world = (ServerWorld) bobber.getWorld();
         *///?}
 
-        if (!player.getInventory().insertStack(lootStack)) {
-            player.dropItem(lootStack, false);
+        for (ItemStack stack : lootItems) {
+            ItemStack toGive = stack.copy();
+            if (isPerfect) {
+                toGive.setCount(toGive.getCount() * 2);
+            }
+            if (!player.getInventory().insertStack(toGive)) {
+                player.dropItem(toGive, false);
+            }
         }
 
         if (isPerfect) {
-            int rarity = ((FishingBobberReelAccess) bobber).ddv$getRarity();
-            ItemStack extraLoot = generateLoot(player, bobber, rarity);
-            if (!player.getInventory().insertStack(extraLoot)) {
-                player.dropItem(extraLoot, false);
-            }
-
             world.spawnParticles(ParticleTypes.SPLASH, bobber.getX(), bobber.getY(), bobber.getZ(), 20, 0.2, 0.2, 0.2, 0.1);
             world.spawnParticles(ParticleTypes.BUBBLE, bobber.getX(), bobber.getY(), bobber.getZ(), 10, 0.2, 0.2, 0.2, 0.1);
             world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 0.5f, 1.5f);
@@ -112,6 +116,14 @@ public class FishingLootHandler {
         } else if (isFishingRod(offHand)) {
             offHand.damage(1, player, EquipmentSlot.OFFHAND);
         }
+    }
+
+    private static ItemStack getFishingRod(ServerPlayerEntity player) {
+        ItemStack mainHand = player.getMainHandStack();
+        if (isFishingRod(mainHand)) return mainHand;
+        ItemStack offHand = player.getOffHandStack();
+        if (isFishingRod(offHand)) return offHand;
+        return mainHand;
     }
 
     private static boolean isFishingRod(ItemStack stack) {

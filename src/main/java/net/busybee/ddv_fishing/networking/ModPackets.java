@@ -6,9 +6,10 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import java.util.List;
 
 
 public class ModPackets {
@@ -34,13 +35,26 @@ public class ModPackets {
             }
 
             int rarity = ((FishingBobberReelAccess) bobber).ddv$getRarity();
-            ItemStack loot = FishingLootHandler.generateLoot(player, bobber, rarity);
-            Text lootName = loot.getName();
+            List<ItemStack> loot = FishingLootHandler.generateLoot(player, bobber, rarity);
             FishingLootHandler.catchFish(player, bobber, loot, payload.isPerfect());
             player.fishHook = null;
             
-            String prefix = payload.isPerfect() ? "Perfect Catch! Caught a " : "Caught a ";
-            player.sendMessage(Text.literal(prefix).append(lootName).append("!"), true);
+            MutableText message = Text.literal(payload.isPerfect() ? "Perfect Catch! Caught " : "Caught ");
+            for (int i = 0; i < loot.size(); i++) {
+                ItemStack stack = loot.get(i);
+                int count = payload.isPerfect() ? stack.getCount() * 2 : stack.getCount();
+                if (count > 1) {
+                    message.append(Text.literal(count + "x "));
+                } else {
+                    message.append(Text.literal("a "));
+                }
+                message.append(stack.getName());
+                if (i < loot.size() - 1) {
+                    message.append(Text.literal(", "));
+                }
+            }
+            message.append(Text.literal("!"));
+            player.sendMessage(message, true);
         });
     }
 }
