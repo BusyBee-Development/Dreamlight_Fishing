@@ -82,9 +82,9 @@ public class FishingMinigameOverlay {
                 if (client.player != null && client.world != null) {
                     float volume = 0.2f + (0.6f - diff) * 0.4f;
                     float pitch = 1.2f + (0.6f - diff) * 0.8f;
-                    client.world.playSound(client.player, client.player.getBlockPos(), 
+                    client.world.playSound(null, client.player.getBlockPos(), 
                         SoundEvents.BLOCK_BARREL_OPEN, SoundCategory.PLAYERS, volume * 0.5f, pitch);
-                    client.world.playSound(client.player, client.player.getBlockPos(), 
+                    client.world.playSound(null, client.player.getBlockPos(), 
                         SoundEvents.BLOCK_WOODEN_BUTTON_CLICK_ON, SoundCategory.PLAYERS, volume, pitch + 0.5f);
                 }
                 soundTicker = Math.max(1, soundInterval);
@@ -92,7 +92,7 @@ public class FishingMinigameOverlay {
         } else if (isSafeToClick() && !chimePlayed) {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null && client.world != null) {
-                client.world.playSound(client.player, client.player.getBlockPos(), 
+                client.world.playSound(null, client.player.getBlockPos(), 
                     SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 0.6f, 2.0f);
             }
             chimePlayed = true;
