@@ -1,6 +1,6 @@
 package net.busybee.ddv_fishing;
 
-import net.busybee.ddv_fishing.access.FishingBobberReelAccess;
+import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -85,14 +85,29 @@ public class FishingLootHandler {
         /*ServerWorld world = (ServerWorld) bobber.getWorld();
         *///?}
 
+        boolean hasSpecial = false;
         for (ItemStack stack : lootItems) {
+            if (isSpecialItem(stack)) {
+                hasSpecial = true;
+            }
             ItemStack toGive = stack.copy();
-            if (isPerfect) {
+            if (isPerfect && !isSpecialItem(stack)) {
                 toGive.setCount(toGive.getCount() * 2);
             }
             if (!player.getInventory().insertStack(toGive)) {
                 player.dropItem(toGive, false);
             }
+        }
+
+        int xp = world.random.nextBetween(1, 6);
+        if (isPerfect) {
+            xp += 5;
+            if (hasSpecial) {
+                xp += 20;
+            }
+        }
+        if (xp > 0) {
+            ExperienceOrbEntity.spawn(world, new Vec3d(player.getX(), player.getY(), player.getZ()), xp);
         }
 
         if (isPerfect) {
@@ -124,6 +139,10 @@ public class FishingLootHandler {
         ItemStack offHand = player.getOffHandStack();
         if (isFishingRod(offHand)) return offHand;
         return mainHand;
+    }
+
+    public static boolean isSpecialItem(ItemStack stack) {
+        return stack.isOf(Items.BOW) || stack.isOf(Items.ENCHANTED_BOOK) || isFishingRod(stack);
     }
 
     private static boolean isFishingRod(ItemStack stack) {

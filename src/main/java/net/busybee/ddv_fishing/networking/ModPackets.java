@@ -42,7 +42,11 @@ public class ModPackets {
             MutableText message = Text.literal(payload.isPerfect() ? "Perfect Catch! Caught " : "Caught ");
             for (int i = 0; i < loot.size(); i++) {
                 ItemStack stack = loot.get(i);
-                int count = payload.isPerfect() ? stack.getCount() * 2 : stack.getCount();
+                int count = stack.getCount();
+                if (payload.isPerfect() && !FishingLootHandler.isSpecialItem(stack)) {
+                    count *= 2;
+                }
+
                 if (count > 1) {
                     message.append(Text.literal(count + "x "));
                 } else {
