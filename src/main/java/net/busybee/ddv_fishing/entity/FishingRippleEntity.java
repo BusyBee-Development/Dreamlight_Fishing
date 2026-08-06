@@ -19,12 +19,19 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+// GeckoLib package layout differs per version:
+//   4.6.6 (<=1.21.1):        animation.AnimatableManager        + animation.AnimationController
+//   5.3   (1.21.2-1.21.10):  animatable.manager.AnimatableManager + animatable.processing.AnimationController
+//   5.4+  (>=1.21.11):       animatable.manager.AnimatableManager + animation.AnimationController
 //? if <1.21.2 {
 /*import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
+*///?} elif <1.21.11 {
+/*import software.bernie.geckolib.animatable.manager.AnimatableManager;
+import software.bernie.geckolib.animatable.processing.AnimationController;
 *///?} else {
 import software.bernie.geckolib.animatable.manager.AnimatableManager;
-import software.bernie.geckolib.animatable.processing.AnimationController;
+import software.bernie.geckolib.animation.AnimationController;
 //?}
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
@@ -53,15 +60,12 @@ public class FishingRippleEntity extends Entity implements GeoEntity {
     public void setRarity(int rarity) {
         this.getDataTracker().set(RARITY, rarity);
     }
-
     public int getRarity() {
         return this.getDataTracker().get(RARITY);
     }
-
     public void setAnimState(int state) {
         this.getDataTracker().set(ANIM_STATE, state);
     }
-
     public int getAnimState() {
         return this.getDataTracker().get(ANIM_STATE);
     }
