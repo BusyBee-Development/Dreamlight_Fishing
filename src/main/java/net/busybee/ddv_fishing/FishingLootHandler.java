@@ -118,18 +118,18 @@ public class FishingLootHandler {
 
         world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, 2.0F);
         
-        damageFishingRod(player);
+        damageFishingRod(player, 1);
         bobber.discard();
     }
 
-    private static void damageFishingRod(ServerPlayerEntity player) {
+    public static void damageFishingRod(ServerPlayerEntity player, int amount) {
         ItemStack mainHand = player.getMainHandStack();
         ItemStack offHand = player.getOffHandStack();
 
         if (isFishingRod(mainHand)) {
-            mainHand.damage(1, player, EquipmentSlot.MAINHAND);
+            mainHand.damage(amount, player, EquipmentSlot.MAINHAND);
         } else if (isFishingRod(offHand)) {
-            offHand.damage(1, player, EquipmentSlot.OFFHAND);
+            offHand.damage(amount, player, EquipmentSlot.OFFHAND);
         }
     }
 

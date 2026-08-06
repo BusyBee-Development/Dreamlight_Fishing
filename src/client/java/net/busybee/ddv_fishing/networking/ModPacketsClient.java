@@ -8,8 +8,9 @@ public class ModPacketsClient {
         ClientPlayNetworking.registerGlobalReceiver(FishingMinigameS2CPacket.ID, (payload, context) -> {
             int hits = payload.hits();
             float speed = payload.speed();
+            int rarity = payload.rarity();
             context.client().execute(() -> {
-                FishingMinigameOverlay.start(hits, speed);
+                FishingMinigameOverlay.start(hits, speed, rarity);
             });
         });
     }

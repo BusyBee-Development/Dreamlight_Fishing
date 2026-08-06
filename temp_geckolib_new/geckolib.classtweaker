@@ -1,0 +1,27 @@
+classTweaker	v1	intermediary
+transitive-inject-interface	net/minecraft/class_10017	software/bernie/geckolib/renderer/base/GeoRenderState
+accessible	method	net/minecraft/class_10799	method_67887	(Lcom/mojang/blaze3d/pipeline/RenderPipeline;)Lcom/mojang/blaze3d/pipeline/RenderPipeline;
+accessible	field	net/minecraft/class_10799	field_60128	Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;
+accessible	method	net/minecraft/class_1921	method_75940	(Ljava/lang/String;Lnet/minecraft/class_12247;)Lnet/minecraft/class_1921;
+accessible	method	net/minecraft/class_4587$class_4665	method_66521	(Lnet/minecraft/class_4587$class_4665;)V
+accessible	field	net/minecraft/class_761	field_20951	Lnet/minecraft/class_4599;
+accessible	field	net/minecraft/class_761	field_61737	Lnet/minecraft/class_11658;
+accessible	field	net/minecraft/class_898	field_4696	Ljava/util/Map;
+extendable	method	net/minecraft/class_897	method_62425	(Lnet/minecraft/class_1297;F)Lnet/minecraft/class_10017;
+accessible	method	net/minecraft/class_922	method_62482	(Lnet/minecraft/class_1309;FF)F
+accessible	method	net/minecraft/class_909	method_65568	(Lnet/minecraft/class_1309;Lnet/minecraft/class_1304;)Lnet/minecraft/class_1799;
+accessible	method	net/minecraft/class_922	method_74932	(Ljava/lang/String;)Z
+accessible	field	net/minecraft/class_10042	field_53467	Lnet/minecraft/class_10444;
+accessible	field	net/minecraft/class_10055	field_55317	Lnet/minecraft/class_10444;
+mutable	field	net/minecraft/class_10042	field_53467	Lnet/minecraft/class_10444;
+mutable	field	net/minecraft/class_10055	field_55317	Lnet/minecraft/class_10444;
+mutable	field	net/minecraft/class_10426	field_55305	Lnet/minecraft/class_10444;
+mutable	field	net/minecraft/class_10426	field_55307	Lnet/minecraft/class_10444;
+accessible	field	net/minecraft/class_824	field_4345	Ljava/util/Map;
+extendable	method	net/minecraft/class_3879	method_62100	(Lnet/minecraft/class_4587;Lnet/minecraft/class_4588;III)V
+accessible	method	net/minecraft/class_970	method_64082	(Lnet/minecraft/class_10192;Lnet/minecraft/class_1304;)Z
+accessible	method	net/minecraft/class_970	method_4172	(Lnet/minecraft/class_10034;Lnet/minecraft/class_1304;)Lnet/minecraft/class_572;
+accessible	method	net/minecraft/class_970	method_4173	(Lnet/minecraft/class_1304;)Z
+accessible	field	net/minecraft/class_922	field_4738	Ljava/util/List;
+accessible	field	net/minecraft/class_630	field_3663	Ljava/util/List;
+accessible	field	net/minecraft/class_9335	field_49656	Z

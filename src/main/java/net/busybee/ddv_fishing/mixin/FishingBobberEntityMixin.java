@@ -28,6 +28,9 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
     @Unique
     private int rippleRarity = 0;
 
+    @Unique
+    private FishingRippleEntity activeRipple;
+
     @Inject(method = "tickFishingLogic", at = @At("HEAD"), cancellable = true)
     private void onTickFishing(BlockPos pos, CallbackInfo ci) {
         ci.cancel();
@@ -41,6 +44,11 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
         //?} else {
         /*World world = bobber.getWorld();
         *///?}
+
+        if (this.activeRipple != null && !this.activeRipple.isRemoved()) {
+            this.activeRipple.refreshPositionAndAngles(bobber.getX(), bobber.getY(), bobber.getZ(), bobber.getYaw(), 0);
+        }
+
         if (world.isClient() || this.minigameActive || bobber.getHookedEntity() != null || bobber.isRemoved()) return;
 
         List<FishingRippleEntity> ripples = world.getEntitiesByClass(
@@ -56,9 +64,10 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
             } else if (rippleBiteDelay > 0) {
                 rippleBiteDelay--;
             } else if (rippleBiteDelay == 0) {
+                this.activeRipple = ripple;
                 startMinigame(bobber, ripple);
                 rippleBiteDelay = -2;
-                ripple.discard();
+                ripple.setAnimState(1); // BITE
             }
         } else {
             rippleBiteDelay = -1;
@@ -81,7 +90,7 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
                 default -> 0.025f;
             } * net.busybee.ddv_fishing.Ddv_fishing.CONFIG.minigame_difficulty_multiplier;
 
-            ServerPlayNetworking.send(player, new FishingMinigameS2CPacket(hits, speed));
+            ServerPlayNetworking.send(player, new FishingMinigameS2CPacket(hits, speed, ripple.getRarity()));
         }
     }
 
@@ -93,6 +102,10 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
 
         this.minigameActive = false;
         this.rippleBiteDelay = -1;
+        if (this.activeRipple != null) {
+            this.activeRipple.discard();
+            this.activeRipple = null;
+        }
         return true;
     }
 
@@ -104,5 +117,12 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
     @Override
     public void ddv$setRarity(int rarity) {
         this.rippleRarity = rarity;
+    }
+
+    @Override
+    public void ddv$setRippleState(int state) {
+        if (this.activeRipple != null) {
+            this.activeRipple.setAnimState(state);
+        }
     }
 }

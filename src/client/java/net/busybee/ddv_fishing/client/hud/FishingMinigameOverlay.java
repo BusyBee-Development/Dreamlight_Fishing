@@ -1,6 +1,8 @@
 package net.busybee.ddv_fishing.client.hud;
 
 import net.busybee.ddv_fishing.networking.FishingMinigameResultC2SPacket;
+import net.busybee.ddv_fishing.networking.FishingMinigamePhaseC2SPacket;
+import net.busybee.ddv_fishing.networking.MinigameResult;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -15,7 +17,13 @@ public class FishingMinigameOverlay {
     private static final Identifier WHITE_TEXTURE = Identifier.of("minecraft", "textures/block/white_concrete.png");
     private static final int RING_SEGMENTS = 64;
 
+    public enum Phase {
+        TIMING,
+        REELING
+    }
+
     private static boolean active = false;
+    private static Phase phase = Phase.TIMING;
     private static float ringScale = 2.0f;
     private static float prevRingScale = 2.0f;
     private static float targetScale = 0.5f;
@@ -28,10 +36,21 @@ public class FishingMinigameOverlay {
     private static boolean chimePlayed = false;
     private static int postMinigameCooldown = 0;
 
-    public static void start(int hits, float difficultySpeed) {
+    private static float tension = 0.0f;
+    private static float reelProgress = 0.0f;
+    private static int fishRarity = 0;
+    private static boolean isPerfect = true;
+    private static MinigameResult lastResult = MinigameResult.SUCCESS;
+
+    public static void start(int hits, float difficultySpeed, int rarity) {
         active = true;
+        phase = Phase.TIMING;
         currentHits = 0;
         requiredHits = hits;
+        fishRarity = rarity;
+        tension = 0.0f;
+        reelProgress = 0.25f; // Start at 25% progress
+        isPerfect = true;
         
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world != null && client.world.isRaining()) {
@@ -58,6 +77,14 @@ public class FishingMinigameOverlay {
 
         if (!active) return;
 
+        if (phase == Phase.TIMING) {
+            tickTiming();
+        } else {
+            tickReeling();
+        }
+    }
+
+    private static void tickTiming() {
         if (actionCooldown > 0) {
             actionCooldown--;
         }
@@ -101,30 +128,115 @@ public class FishingMinigameOverlay {
         if (soundTicker > 0) soundTicker--;
 
         if (ringScale < 0.2f) {
-            fail();
+            fail(MinigameResult.ESCAPE);
+        }
+    }
+
+    private static void tickReeling() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        boolean isReeling = client.options.useKey.isPressed();
+        
+        float resistance = 0.004f + (fishRarity * 0.003f);
+        float tensionGain = 0.015f + (fishRarity * 0.005f);
+        float progressGain = 0.012f - (fishRarity * 0.002f);
+        
+        if (isReeling) {
+            tension += tensionGain;
+            reelProgress += progressGain;
+            
+            if (swingTicker <= 0) {
+                if (client.player != null) client.player.swingHand(Hand.MAIN_HAND);
+                swingTicker = 6;
+            }
+        } else {
+            tension -= 0.02f;
+            reelProgress -= resistance;
+        }
+        
+        tension = MathHelper.clamp(tension, 0.0f, 1.1f);
+        reelProgress = MathHelper.clamp(reelProgress, -0.1f, 1.1f);
+        
+        if (swingTicker > 0) swingTicker--;
+        
+        if (tension >= 1.0f) {
+            fail(MinigameResult.SNAP);
+        } else if (reelProgress <= 0.0f) {
+            fail(MinigameResult.ESCAPE);
+        } else if (reelProgress >= 1.0f) {
+            win(isPerfect);
         }
     }
 
     public static void render(DrawContext context, RenderTickCounter tickCounter) {
-        if (!active) return;
-
         int screenWidth = context.getScaledWindowWidth();
         int screenHeight = context.getScaledWindowHeight();
         int centerX = screenWidth / 2;
         int centerY = screenHeight / 2;
-
         var textRenderer = MinecraftClient.getInstance().textRenderer;
 
-        context.drawCenteredTextWithShadow(textRenderer, 
-            "Successes: " + currentHits + "/" + requiredHits, centerX, centerY + 100, 0xFFFFFFFF);
+        if (active) {
+            if (phase == Phase.TIMING) {
+                context.drawCenteredTextWithShadow(textRenderer, 
+                    "Successes: " + currentHits + "/" + requiredHits, centerX, centerY + 100, 0xFFFFFFFF);
 
-        String instruction = isSafeToClick() ? "CLICK NOW!" : "Wait for it...";
-        int instructionColor = isSafeToClick() ? 0xFF00FF00 : 0xFFFFFFFF;
-        context.drawCenteredTextWithShadow(textRenderer, instruction, centerX, centerY + 115, instructionColor);
+                String instruction = isSafeToClick() ? "CLICK NOW!" : "Wait for it...";
+                int instructionColor = isSafeToClick() ? 0xFF00FF00 : 0xFFFFFFFF;
+                context.drawCenteredTextWithShadow(textRenderer, instruction, centerX, centerY + 115, instructionColor);
+            } else {
+                renderReeling(context, centerX, screenHeight, textRenderer);
+            }
+        } else if (postMinigameCooldown > 0) {
+            String message = "";
+            int color = 0xFFFFFFFF;
+            if (lastResult == MinigameResult.SNAP) {
+                message = "LINE SNAPPED!";
+                color = 0xFFFF0000;
+            } else if (lastResult == MinigameResult.ESCAPE) {
+                message = "FISH GOT AWAY...";
+                color = 0xFFAAAAAA;
+            } else if (lastResult == MinigameResult.SUCCESS) {
+                message = isPerfect ? "PERFECT CATCH!" : "FISH CAUGHT!";
+                color = 0xFF00FF00;
+            }
+            
+            if (!message.isEmpty()) {
+                context.drawCenteredTextWithShadow(textRenderer, message, centerX, centerY, color);
+            }
+        }
+    }
+
+    private static void renderReeling(DrawContext context, int centerX, int screenHeight, net.minecraft.client.font.TextRenderer textRenderer) {
+        int barWidth = 4;
+        int barHeight = 40;
+        int yBottom = screenHeight - 40;
+        int yTop = yBottom - barHeight;
+
+        // Tension Bar (Left of Health)
+        int xTension = centerX - 91 - 10;
+        context.fill(xTension - 1, yTop - 1, xTension + barWidth + 1, yBottom + 1, 0xFF000000);
+        
+        int tensionColor = 0xFF00FF00;
+        if (tension > 0.8f) tensionColor = 0xFFFF0000;
+        else if (tension > 0.5f) tensionColor = 0xFFFFFF00;
+        
+        int tensionFillHeight = (int)(barHeight * MathHelper.clamp(tension, 0.0f, 1.0f));
+        context.fill(xTension, yBottom - tensionFillHeight, xTension + barWidth, yBottom, tensionColor);
+        context.drawCenteredTextWithShadow(textRenderer, "T", xTension + barWidth / 2, yTop - 12, 0xFFFFFFFF);
+
+        // Progress Bar (Right of Hunger)
+        int xProgress = centerX + 91 + 6;
+        context.fill(xProgress - 1, yTop - 1, xProgress + barWidth + 1, yBottom + 1, 0xFF000000);
+        
+        int progressFillHeight = (int)(barHeight * MathHelper.clamp(reelProgress, 0.0f, 1.0f));
+        context.fill(xProgress, yBottom - progressFillHeight, xProgress + barWidth, yBottom, 0xFF00AAFF);
+        context.drawCenteredTextWithShadow(textRenderer, "P", xProgress + barWidth / 2, yTop - 12, 0xFFFFFFFF);
+
+        String instruction = MinecraftClient.getInstance().options.useKey.isPressed() ? "REELING!" : "HOLD [USE] TO REEL";
+        context.drawCenteredTextWithShadow(textRenderer, instruction, centerX, screenHeight - 55, 0xFFCCCCCC);
     }
 
     public static void renderWorld(net.minecraft.client.util.math.MatrixStack matrices, net.minecraft.client.render.VertexConsumerProvider vertexConsumers, float tickDelta) {
-        if (!active) return;
+        if (!active || phase != Phase.TIMING) return;
 
         float currentScale = MathHelper.lerp(tickDelta, prevRingScale, ringScale);
         
@@ -188,33 +300,38 @@ public class FishingMinigameOverlay {
     }
 
     public static void onAction() {
-        if (!active || actionCooldown > 0) return;
+        if (!active || actionCooldown > 0 || phase != Phase.TIMING) return;
 
         if (isSafeToClick()) {
-            boolean isPerfect = Math.abs(ringScale - targetScale) < 0.05f;
+            boolean currentPerfect = Math.abs(ringScale - targetScale) < 0.05f;
+            if (!currentPerfect) isPerfect = false;
+            
             currentHits++;
             ringScale = 2.0f;
             soundTicker = 0;
             chimePlayed = false;
             actionCooldown = 10;
             if (currentHits >= requiredHits) {
-                win(isPerfect);
+                phase = Phase.REELING;
+                ClientPlayNetworking.send(new FishingMinigamePhaseC2SPacket(2));
             }
         } else {
-            fail();
+            fail(MinigameResult.ESCAPE);
         }
     }
 
     private static void win(boolean isPerfect) {
         active = false;
-        postMinigameCooldown = 10;
-        ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(true, isPerfect));
+        lastResult = MinigameResult.SUCCESS;
+        postMinigameCooldown = 40;
+        ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(MinigameResult.SUCCESS, isPerfect));
     }
 
-    private static void fail() {
+    private static void fail(MinigameResult result) {
         active = false;
-        postMinigameCooldown = 10;
-        ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(false, false));
+        lastResult = result;
+        postMinigameCooldown = 40;
+        ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(result, false));
     }
 
     public static boolean isActive() {

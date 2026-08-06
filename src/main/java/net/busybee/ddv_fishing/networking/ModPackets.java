@@ -17,9 +17,18 @@ public class ModPackets {
     public static void registerPayloads() {
         PayloadTypeRegistry.playS2C().register(FishingMinigameS2CPacket.ID, FishingMinigameS2CPacket.CODEC);
         PayloadTypeRegistry.playC2S().register(FishingMinigameResultC2SPacket.ID, FishingMinigameResultC2SPacket.CODEC);
+        PayloadTypeRegistry.playC2S().register(FishingMinigamePhaseC2SPacket.ID, FishingMinigamePhaseC2SPacket.CODEC);
     }
 
     public static void registerServerHandlers() {
+        ServerPlayNetworking.registerGlobalReceiver(FishingMinigamePhaseC2SPacket.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            FishingBobberEntity bobber = player.fishHook;
+            if (bobber instanceof FishingBobberReelAccess reelAccess) {
+                reelAccess.ddv$setRippleState(payload.phase());
+            }
+        });
+
         ServerPlayNetworking.registerGlobalReceiver(FishingMinigameResultC2SPacket.ID, (payload, context) -> {
             ServerPlayerEntity player = context.player();
             FishingBobberEntity bobber = player.fishHook;
@@ -27,8 +36,14 @@ public class ModPackets {
                 return;
             }
 
-            if (!payload.success()) {
-                player.sendMessage(Text.literal("The fish got away..."), true);
+            if (payload.result() != MinigameResult.SUCCESS) {
+                if (payload.result() == MinigameResult.SNAP) {
+                    player.sendMessage(Text.literal("Your line snapped!"), true);
+                    FishingLootHandler.damageFishingRod(player, 5 + context.player().getRandom().nextInt(5));
+                } else {
+                    player.sendMessage(Text.literal("The fish got away..."), true);
+                    FishingLootHandler.damageFishingRod(player, 1);
+                }
                 bobber.discard();
                 player.fishHook = null;
                 return;

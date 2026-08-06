@@ -17,9 +17,23 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+//? if <1.21.2 {
+/*import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+*///?} else {
+import software.bernie.geckolib.animatable.manager.AnimatableManager;
+import software.bernie.geckolib.animatable.processing.AnimationController;
+//?}
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class FishingRippleEntity extends Entity {
+public class FishingRippleEntity extends Entity implements GeoEntity {
     private static final TrackedData<Integer> RARITY = DataTracker.registerData(FishingRippleEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> ANIM_STATE = DataTracker.registerData(FishingRippleEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private int maxAge = 1200;
 
@@ -33,6 +47,7 @@ public class FishingRippleEntity extends Entity {
     @Override
     protected void initDataTracker(DataTracker.Builder builder) {
         builder.add(RARITY, 0);
+        builder.add(ANIM_STATE, 0);
     }
 
     public void setRarity(int rarity) {
@@ -41,6 +56,40 @@ public class FishingRippleEntity extends Entity {
 
     public int getRarity() {
         return this.getDataTracker().get(RARITY);
+    }
+
+    public void setAnimState(int state) {
+        this.getDataTracker().set(ANIM_STATE, state);
+    }
+
+    public int getAnimState() {
+        return this.getDataTracker().get(ANIM_STATE);
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        //? if <1.21.2 {
+        /*
+        controllers.add(new AnimationController<>(this, "controller", 5, state -> {
+            int s = getAnimState();
+            if (s == 2) return state.setAndContinue(RawAnimation.begin().thenLoop("reeling"));
+            if (s == 1) return state.setAndContinue(RawAnimation.begin().thenPlay("bite"));
+            return state.setAndContinue(RawAnimation.begin().thenLoop("idle"));
+        }));
+        */
+        //?} else {
+        controllers.add(new AnimationController<>("controller", 5, state -> {
+            int s = getAnimState();
+            if (s == 2) return state.setAndContinue(RawAnimation.begin().thenLoop("reeling"));
+            if (s == 1) return state.setAndContinue(RawAnimation.begin().thenPlay("bite"));
+            return state.setAndContinue(RawAnimation.begin().thenLoop("idle"));
+        }));
+        //?}
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 
     //? if >1.21.1 {

@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Specification-Title: GeckoLib 5
+Specification-Vendor: Tslat
+Specification-Version: 5.5.1
+Implementation-Title: GeckoLib 5
+Implementation-Version: 5.5.1
+Implementation-Vendor: Tslat
+Built-On-Minecraft: {strictly [26.2,); prefer 26.2}
+MixinConfigs: geckolib.mixins.json
+Fabric-Mapping-Namespace: official
+Fabric-Gradle-Version: 9.5.1
+Fabric-Loom-Version: 1.17.11
+Fabric-Mixin-Compile-Extensions-Version: 0.6.0
+Fabric-Minecraft-Version: 26.2
+Fabric-Tiny-Remapper-Version: 0.14.0
+Fabric-Loader-Version: 0.19.3
+Fabric-Mixin-Version: 0.17.3+mixin.0.8.7
+Fabric-Mixin-Group: net.fabricmc
+

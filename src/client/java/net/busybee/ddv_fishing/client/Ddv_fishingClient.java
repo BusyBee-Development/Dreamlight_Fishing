@@ -1,5 +1,6 @@
 package net.busybee.ddv_fishing.client;
 
+import net.busybee.ddv_fishing.client.entity.FishingRippleRenderer;
 import net.busybee.ddv_fishing.client.hud.FishingMinigameOverlay;
 import net.busybee.ddv_fishing.networking.ModPacketsClient;
 import net.busybee.ddv_fishing.registry.ModEntities;
@@ -24,7 +25,7 @@ public class Ddv_fishingClient implements ClientModInitializer {
         /*HudRenderCallback.EVENT.register(FishingMinigameOverlay::render);
         *///?}
 
-        EntityRendererRegistry.register(ModEntities.FISHING_RIPPLE, EmptyEntityRenderer::new);
+        EntityRendererRegistry.register(ModEntities.FISHING_RIPPLE, FishingRippleRenderer::new);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.world != null && !client.isPaused()) {

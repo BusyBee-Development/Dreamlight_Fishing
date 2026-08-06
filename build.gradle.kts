@@ -37,6 +37,10 @@ fabricApi {
 }
 
 repositories {
+    maven("https://maven.fabricmc.net/")
+    maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/")
+    maven("https://api.modrinth.com/maven")
+    mavenCentral()
 }
 
 dependencies {
@@ -44,6 +48,24 @@ dependencies {
     mappings("net.fabricmc:yarn:$yarn_mappings:v2")
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
+
+    val gVersion = project.findProperty("geckolib_version") as? String
+    val gGroup = project.findProperty("geckolib_group") as? String ?: "software.bernie.geckolib"
+
+    val v = gVersion ?: when (minecraft_version) {
+        "1.21.1" -> "4.6.6"
+        "1.21.2", "1.21.10" -> "5.3-alpha-3"
+        "1.21.11" -> "5.4.4"
+        else -> null
+    }
+
+    if (v != null) {
+        if (gGroup == "maven.modrinth" || (minecraft_version == "1.21.2" && gGroup == "software.bernie.geckolib")) {
+            modImplementation("maven.modrinth:geckolib:$v")
+        } else {
+            modImplementation("$gGroup:geckolib-fabric-$minecraft_version:$v")
+        }
+    }
 }
 
 tasks.processResources {
