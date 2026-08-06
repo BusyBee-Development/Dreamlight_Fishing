@@ -55,12 +55,15 @@ dependencies {
     // GeckoLib publishes a separate artifact per Minecraft version, and the API layout
     // changes between generations - see the stonecutter blocks in FishingRipple*.java.
     // Caveats:
-    //   1.21.2 - no GeckoLib release exists; we borrow the 1.21.10 build so it compiles.
     //   1.21.3 - 4.7.2/4.7.3 were published as empty jars, so 4.7.1 is the last usable one.
-    //   1.21.9 - no GeckoLib release exists at all (upstream went 1.21.8 -> 1.21.10).
+    //   1.21.2 / 1.21.9 - GeckoLib has NO release for these at all (upstream skipped both).
+    //     They borrow the 1.21.10 build so the source set still compiles. This is a
+    //     build-only workaround: there is no GeckoLib a player can install on 1.21.2 or
+    //     1.21.9, so the mod cannot actually run there. Drop those targets from
+    //     settings.gradle.kts if you want the build to reflect reality.
     val v = gVersion ?: when (minecraft_version) {
         "1.21.1" -> "4.6.6"
-        "1.21.2", "1.21.10" -> "5.3-alpha-3"
+        "1.21.2", "1.21.9", "1.21.10" -> "5.3-alpha-3"
         "1.21.3" -> "4.7.1"
         "1.21.4" -> "4.8.5"
         "1.21.5" -> "5.1.0"
@@ -71,8 +74,12 @@ dependencies {
         else -> null
     }
 
+    // Versions with no GeckoLib artifact of their own must be pulled from Modrinth, which
+    // serves the file by GeckoLib version rather than by "geckolib-fabric-<mc>" coordinate.
+    val borrowsForeignBuild = minecraft_version in setOf("1.21.2", "1.21.9")
+
     if (v != null) {
-        if (gGroup == "maven.modrinth" || (minecraft_version == "1.21.2" && gGroup == "software.bernie.geckolib")) {
+        if (gGroup == "maven.modrinth" || (borrowsForeignBuild && gGroup == "software.bernie.geckolib")) {
             modImplementation("maven.modrinth:geckolib:$v")
         } else {
             modImplementation("$gGroup:geckolib-fabric-$minecraft_version:$v")

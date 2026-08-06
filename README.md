@@ -100,5 +100,15 @@ Once hooked, the fish appears in the water!
 
 ## 👤 Credits
 
-Developed by **BusyBee**.  
+Developed by **BusyBee**.
 *Inspired by the fishing mechanics in Disney Dreamlight Valley.*
+
+### 🌟 Contributors
+
+A huge thank you to everyone who has contributed code to **Dreamlight Fishing**!
+
+| Contributor                                  | Contribution                                                                                                                                                                                |
+|:---------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **[@Spagles](https://github.com/Spagles)**   | Fixed silent minigame audio cues by passing a null sound exemption ([`99576e0`](https://github.com/BusyBee-Development/Dreamlight_Fishing/commit/99576e0f6975c1fe4b4ca24753973849d96bffc4)) |
+
+*Want to see your name here? Check out the [Want to Contribute?](#-want-to-contribute) section above!*
