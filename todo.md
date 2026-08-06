@@ -1,13 +1,14 @@
 # 📋 Dreamlight Fishing Roadmap
 
 ## Phase 1: Completing the Core Loop
-- [ ] **Build the missing reeling phase**
-    - [ ] Implement the tension meter HUD
-    - [ ] Add fish resistance logic (fish pulling away) and the manual reeling interaction
-    - [ ] Add the "Line Snap" mechanic when tension is too high or the fish gets too far
-- [ ] **Add better failure feedback**
-    - [ ] Create visual/text cues for "Fish got away" vs. "Line snapped"
-    - [ ] Add a small durability penalty for snaps to make the reeling phase meaningful
+- [x] **Build the missing reeling phase**
+    - [x] Implement the tension meter HUD
+    - [x] Add fish resistance logic (fish pulling away) and the manual reeling interaction
+    - [x] Add the "Line Snap" mechanic when tension is too high or the fish gets too far
+- [x] **Add better failure feedback**
+    - [x] Create visual/text cues for "Fish got away" vs. "Line snapped"
+    - [x] Add a small durability penalty for snaps to make the reeling phase meaningful
+    - [x] Add basic fishing rod
 
 ## Phase 2: Content & Biome Depth
 - [ ] **Use existing biome detection for specific catches**
