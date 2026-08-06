@@ -52,9 +52,21 @@ dependencies {
     val gVersion = project.findProperty("geckolib_version") as? String
     val gGroup = project.findProperty("geckolib_group") as? String ?: "software.bernie.geckolib"
 
+    // GeckoLib publishes a separate artifact per Minecraft version, and the API layout
+    // changes between generations - see the stonecutter blocks in FishingRipple*.java.
+    // Caveats:
+    //   1.21.2 - no GeckoLib release exists; we borrow the 1.21.10 build so it compiles.
+    //   1.21.3 - 4.7.2/4.7.3 were published as empty jars, so 4.7.1 is the last usable one.
+    //   1.21.9 - no GeckoLib release exists at all (upstream went 1.21.8 -> 1.21.10).
     val v = gVersion ?: when (minecraft_version) {
         "1.21.1" -> "4.6.6"
         "1.21.2", "1.21.10" -> "5.3-alpha-3"
+        "1.21.3" -> "4.7.1"
+        "1.21.4" -> "4.8.5"
+        "1.21.5" -> "5.1.0"
+        "1.21.6" -> "5.2.0"
+        "1.21.7" -> "5.2.1"
+        "1.21.8" -> "5.2.2"
         "1.21.11" -> "5.4.4"
         else -> null
     }

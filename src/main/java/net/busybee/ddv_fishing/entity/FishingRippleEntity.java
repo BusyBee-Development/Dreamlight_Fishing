@@ -19,11 +19,12 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-// GeckoLib package layout differs per version:
-//   4.6.6 (<=1.21.1):        animation.AnimatableManager        + animation.AnimationController
-//   5.3   (1.21.2-1.21.10):  animatable.manager.AnimatableManager + animatable.processing.AnimationController
-//   5.4+  (>=1.21.11):       animatable.manager.AnimatableManager + animation.AnimationController
-//? if <1.21.2 {
+// GeckoLib's package layout changes between generations. The API break is at 1.21.5,
+// except 1.21.2 which has no GeckoLib release and borrows the 1.21.10 build (see build.gradle.kts).
+//   GeckoLib 4.x (1.21.1, 1.21.3, 1.21.4): animation.AnimatableManager         + animation.AnimationController
+//   GeckoLib 5.0-5.3 (1.21.2, 1.21.5-1.21.10): animatable.manager.AnimatableManager + animatable.processing.AnimationController
+//   GeckoLib 5.4+ (>=1.21.11):            animatable.manager.AnimatableManager + animation.AnimationController
+//? if <1.21.2 || (>=1.21.3 && <1.21.5) {
 /*import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
 *///?} elif <1.21.11 {
@@ -72,7 +73,8 @@ public class FishingRippleEntity extends Entity implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        //? if <1.21.2 {
+        // GeckoLib 4.x takes the animatable as the first constructor arg; 5.x dropped it.
+        //? if <1.21.2 || (>=1.21.3 && <1.21.5) {
         /*
         controllers.add(new AnimationController<>(this, "controller", 5, state -> {
             int s = getAnimState();
