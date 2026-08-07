@@ -9,6 +9,16 @@
     - [x] Create visual/text cues for "Fish got away" vs. "Line snapped"
     - [x] Add a small durability penalty for snaps to make the reeling phase meaningful
     - [x] Add basic fishing rod
+- [ ] **Close the core-loop gaps**
+  - [ ] Wire up `FishingMinigameOverlay.stop()` — cancel on death, disconnect,
+    dimension change, and bobber removal (currently dead code)
+  - [ ] Move minigame validation server-side; don't trust client-sent
+    SUCCESS/isPerfect
+  - [ ] Declare GeckoLib in `fabric.mod.json` depends
+  - [ ] Scope rod animation state per-stack instead of a global static
+  - [ ] Verify the reeling animation actually plays in game
+  - [ ] Sit ripple rings flush with the water surface
+  - [ ] Make `enabled = false` disable the minigame, not just spawning
 
 ## Phase 2: Content & Biome Depth
 - [ ] **Use existing biome detection for specific catches**
@@ -29,6 +39,7 @@
 
 ## Phase 4: Progression & Systems
 - [ ] **Make rods alter the minigame mechanics**
+    - [x] `magic rod`: Just the basic rod to replace the vanilla rod
     - [ ] `sturdy rod`: Reduces tension buildup
     - [ ] `swift rod`: Increases reel-in speed
     - [ ] `lucky rod`: Increases rare ripple spawn chance
