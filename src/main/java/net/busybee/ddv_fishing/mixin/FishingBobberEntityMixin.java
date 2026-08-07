@@ -1,9 +1,11 @@
 package net.busybee.ddv_fishing.mixin;
 
+import net.busybee.ddv_fishing.FishingLootHandler;
 import net.busybee.ddv_fishing.access.FishingBobberReelAccess;
 import net.busybee.ddv_fishing.entity.FishingRippleEntity;
 import net.busybee.ddv_fishing.networking.FishingMinigameS2CPacket;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -13,6 +15,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
@@ -31,9 +34,54 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
     @Unique
     private FishingRippleEntity activeRipple;
 
+    /**
+     * True when the bobber's owner is holding a fishing rod of any kind in either hand.
+     */
+    @Unique
+    private boolean ddv$holdsFishingRod() {
+        FishingBobberEntity bobber = (FishingBobberEntity)(Object)this;
+
+        if (!(bobber.getOwner() instanceof PlayerEntity player)) return false;
+
+        return FishingLootHandler.isFishingRod(player.getMainHandStack())
+                || FishingLootHandler.isFishingRod(player.getOffHandStack());
+    }
+
+    /**
+     * Keep the bobber alive for rods that are not literally {@code Items.FISHING_ROD}.
+     * <p>
+     * Vanilla's check is an identity test against the vanilla item, not
+     * {@code instanceof FishingRodItem}. Any custom rod therefore casts fine and then has its
+     * bobber discarded on the very first tick, so no line and no bobber ever appear. This
+     * re-runs vanilla's own conditions with the broad {@link FishingLootHandler#isFishingRod}
+     * test and reports "valid" when they pass. For a vanilla rod it falls through and changes
+     * nothing.
+     */
+    @Inject(method = "removeIfInvalid", at = @At("HEAD"), cancellable = true)
+    private void ddv$keepAliveForAnyRod(PlayerEntity player, CallbackInfoReturnable<Boolean> cir) {
+        FishingBobberEntity bobber = (FishingBobberEntity)(Object)this;
+
+        if (!player.isInteractable()) return;
+        if (bobber.squaredDistanceTo(player) > 1024.0) return;
+        if (!FishingLootHandler.isFishingRod(player.getMainHandStack())
+                && !FishingLootHandler.isFishingRod(player.getOffHandStack())) return;
+
+        cir.setReturnValue(false);
+    }
+
+    /**
+     * Suppress vanilla fishing only while a ripple has the line.
+     * <p>
+     * This used to cancel for the whole time a Dreamlight rod was held, which meant that if a
+     * ripple failed to register the rod caught nothing at all and looked broken. Away from a
+     * ripple the rod now behaves exactly like a vanilla rod, so the minigame layers on top of
+     * fishing instead of replacing it.
+     */
     @Inject(method = "tickFishingLogic", at = @At("HEAD"), cancellable = true)
     private void onTickFishing(BlockPos pos, CallbackInfo ci) {
-        ci.cancel();
+        if (this.minigameActive || this.rippleBiteDelay != -1) {
+            ci.cancel();
+        }
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
@@ -50,6 +98,7 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
         }
 
         if (world.isClient() || this.minigameActive || bobber.getHookedEntity() != null || bobber.isRemoved()) return;
+        if (!ddv$holdsFishingRod()) return;
 
         List<FishingRippleEntity> ripples = world.getEntitiesByClass(
                 FishingRippleEntity.class,
@@ -67,7 +116,7 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
                 this.activeRipple = ripple;
                 startMinigame(bobber, ripple);
                 rippleBiteDelay = -2;
-                ripple.setAnimState(1); // BITE
+                ripple.setActivityState(FishingRippleEntity.STATE_BITE);
             }
         } else {
             rippleBiteDelay = -1;
@@ -122,7 +171,7 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
     @Override
     public void ddv$setRippleState(int state) {
         if (this.activeRipple != null) {
-            this.activeRipple.setAnimState(state);
+            this.activeRipple.setActivityState(state);
         }
     }
 }

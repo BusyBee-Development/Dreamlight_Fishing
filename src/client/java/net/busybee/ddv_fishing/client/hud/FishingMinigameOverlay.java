@@ -1,5 +1,7 @@
 package net.busybee.ddv_fishing.client.hud;
 
+import net.busybee.ddv_fishing.entity.FishingRippleEntity;
+import net.busybee.ddv_fishing.item.MagicalFishingRodItem;
 import net.busybee.ddv_fishing.networking.FishingMinigameResultC2SPacket;
 import net.busybee.ddv_fishing.networking.FishingMinigamePhaseC2SPacket;
 import net.busybee.ddv_fishing.networking.MinigameResult;
@@ -64,10 +66,12 @@ public class FishingMinigameOverlay {
         soundTicker = 0;
         swingTicker = 0;
         chimePlayed = false;
+        MagicalFishingRodItem.setClientAnimState(MagicalFishingRodItem.ANIM_BITE);
     }
 
     public static void stop() {
         active = false;
+        MagicalFishingRodItem.setClientAnimState(MagicalFishingRodItem.ANIM_IDLE);
     }
 
     public static void tick() {
@@ -313,7 +317,9 @@ public class FishingMinigameOverlay {
             actionCooldown = 10;
             if (currentHits >= requiredHits) {
                 phase = Phase.REELING;
-                ClientPlayNetworking.send(new FishingMinigamePhaseC2SPacket(2));
+                MagicalFishingRodItem.setClientAnimState(MagicalFishingRodItem.ANIM_REELING);
+                // The server forwards this straight to the ripple - must stay FishingRippleEntity.STATE_REELING.
+                ClientPlayNetworking.send(new FishingMinigamePhaseC2SPacket(FishingRippleEntity.STATE_REELING));
             }
         } else {
             fail(MinigameResult.ESCAPE);
@@ -324,6 +330,7 @@ public class FishingMinigameOverlay {
         active = false;
         lastResult = MinigameResult.SUCCESS;
         postMinigameCooldown = 40;
+        MagicalFishingRodItem.setClientAnimState(MagicalFishingRodItem.ANIM_IDLE);
         ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(MinigameResult.SUCCESS, isPerfect));
     }
 
@@ -331,6 +338,7 @@ public class FishingMinigameOverlay {
         active = false;
         lastResult = result;
         postMinigameCooldown = 40;
+        MagicalFishingRodItem.setClientAnimState(MagicalFishingRodItem.ANIM_IDLE);
         ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(result, false));
     }
 

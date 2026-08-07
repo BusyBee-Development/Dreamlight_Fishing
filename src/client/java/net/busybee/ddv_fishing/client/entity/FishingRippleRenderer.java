@@ -2,24 +2,26 @@ package net.busybee.ddv_fishing.client.entity;
 
 import net.busybee.ddv_fishing.entity.FishingRippleEntity;
 import net.minecraft.client.render.entity.EntityRendererFactory;
-// GeckoLib 5.x split the render state out into a second type parameter.
-//? if <1.21.2 || (>=1.21.3 && <1.21.5) {
-/*import software.bernie.geckolib.renderer.GeoEntityRenderer;
-*///?} else {
+import net.minecraft.client.render.entity.state.EntityRenderState;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.base.GeoRenderState;
-//?}
 
-//? if <1.21.2 || (>=1.21.3 && <1.21.5) {
-/*public class FishingRippleRenderer extends GeoEntityRenderer<FishingRippleEntity> {
+/**
+ * Renders the ripple rings, tinted to signal how hard the catch will be.
+ * <p>
+ * The generated texture is deliberately pale so this tint reads cleanly - multiplying a colour
+ * over a saturated base would come out muddy. One texture and three tints replaces the three
+ * separate coloured models an earlier attempt used.
+ */
+public class FishingRippleRenderer<R extends EntityRenderState & GeoRenderState>
+        extends GeoEntityRenderer<FishingRippleEntity, R> {
+
     public FishingRippleRenderer(EntityRendererFactory.Context renderManager) {
         super(renderManager, new FishingRippleModel());
     }
-}
-*///?} else {
-public class FishingRippleRenderer<R extends net.minecraft.client.render.entity.state.EntityRenderState & GeoRenderState> extends GeoEntityRenderer<FishingRippleEntity, R> {
-    public FishingRippleRenderer(EntityRendererFactory.Context renderManager) {
-        super(renderManager, new FishingRippleModel<>());
+
+    @Override
+    public int getRenderColor(FishingRippleEntity animatable, Void relatedObject, float partialTick) {
+        return 0xFF000000 | FishingRippleEntity.getRarityRgb(animatable.getRarity());
     }
 }
-//?}

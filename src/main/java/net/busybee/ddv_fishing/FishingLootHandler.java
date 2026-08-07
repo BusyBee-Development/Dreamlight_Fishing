@@ -2,6 +2,7 @@ package net.busybee.ddv_fishing;
 
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.item.FishingRodItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -145,7 +146,16 @@ public class FishingLootHandler {
         return stack.isOf(Items.BOW) || stack.isOf(Items.ENCHANTED_BOOK) || isFishingRod(stack);
     }
 
-    private static boolean isFishingRod(ItemStack stack) {
-        return stack.isOf(Items.FISHING_ROD) || stack.isIn(C_FISHING_RODS) || stack.isIn(FABRIC_FISHING_RODS);
+    /**
+     * Whether this stack is any kind of fishing rod - vanilla, Dreamlight, or another mod's.
+     * <p>
+     * The minigame used to be gated on the Dreamlight rod alone. It is deliberately broad now:
+     * a plain vanilla rod fishes the ripples, so the feature does not depend on the custom rod
+     * working. Also used to classify <i>loot</i>, where a rod pulled out of the water counts as
+     * a rare catch.
+     */
+    public static boolean isFishingRod(ItemStack stack) {
+        return stack.isOf(Items.FISHING_ROD) || stack.getItem() instanceof FishingRodItem
+                || stack.isIn(C_FISHING_RODS) || stack.isIn(FABRIC_FISHING_RODS);
     }
 }

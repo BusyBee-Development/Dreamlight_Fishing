@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "ddv_fishing:item/magical_fishing_rod",
+    "model": {
+      "type": "geckolib:geckolib"
+    }
+  }
+}

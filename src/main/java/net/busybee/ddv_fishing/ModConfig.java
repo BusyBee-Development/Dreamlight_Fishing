@@ -23,11 +23,24 @@ public class ModConfig {
     public boolean luck_affects_rarity = true;
     public float minigame_difficulty_multiplier = 1.0f;
 
+    /** Share of ripples that spawn green - the middling catch. */
+    public float green_ripple_chance = 0.20f;
+    /** Share of ripples that spawn orange - the hardest catch. The rest spawn blue. */
+    public float orange_ripple_chance = 0.10f;
+
     public static ModConfig load() {
+        // Logged because the file's location is otherwise guesswork - it sits in the instance's
+        // config dir, which is not where people look first.
+        LOGGER.info("Config: {}", CONFIG_FILE.getAbsolutePath());
         if (CONFIG_FILE.exists()) {
             try (FileReader reader = new FileReader(CONFIG_FILE)) {
                 ModConfig config = GSON.fromJson(reader, ModConfig.class);
-                if (config != null) return config;
+                if (config != null) {
+                    // Write straight back so keys added in a new version appear in the file at
+                    // their defaults. Without this an existing config silently hides new options.
+                    config.save();
+                    return config;
+                }
             } catch (IOException e) {
                 LOGGER.error("Failed to load config", e);
             }

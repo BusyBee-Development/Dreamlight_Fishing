@@ -51,16 +51,6 @@ dependencies {
 
     val gVersion = project.findProperty("geckolib_version") as? String
     val gGroup = project.findProperty("geckolib_group") as? String ?: "software.bernie.geckolib"
-
-    // GeckoLib publishes a separate artifact per Minecraft version, and the API layout
-    // changes between generations - see the stonecutter blocks in FishingRipple*.java.
-    // Caveats:
-    //   1.21.3 - 4.7.2/4.7.3 were published as empty jars, so 4.7.1 is the last usable one.
-    //   1.21.2 / 1.21.9 - GeckoLib has NO release for these at all (upstream skipped both).
-    //     They borrow the 1.21.10 build so the source set still compiles. This is a
-    //     build-only workaround: there is no GeckoLib a player can install on 1.21.2 or
-    //     1.21.9, so the mod cannot actually run there. Drop those targets from
-    //     settings.gradle.kts if you want the build to reflect reality.
     val v = gVersion ?: when (minecraft_version) {
         "1.21.1" -> "4.6.6"
         "1.21.2", "1.21.9", "1.21.10" -> "5.3-alpha-3"
@@ -74,8 +64,6 @@ dependencies {
         else -> null
     }
 
-    // Versions with no GeckoLib artifact of their own must be pulled from Modrinth, which
-    // serves the file by GeckoLib version rather than by "geckolib-fabric-<mc>" coordinate.
     val borrowsForeignBuild = minecraft_version in setOf("1.21.2", "1.21.9")
 
     if (v != null) {
@@ -87,10 +75,26 @@ dependencies {
     }
 }
 
+val (resourcePackFormat, dataPackFormat) = when (minecraft_version) {
+    "1.21.1" -> 34 to 48
+    "1.21.2", "1.21.3" -> 42 to 57
+    "1.21.4" -> 46 to 61
+    "1.21.5" -> 55 to 71
+    "1.21.6" -> 63 to 80
+    "1.21.7", "1.21.8" -> 64 to 81
+    "1.21.9", "1.21.10" -> 69 to 88
+    "1.21.11" -> 75 to 94
+    else -> throw GradleException("No pack format mapping for Minecraft $minecraft_version")
+}
+
+val usesLegacyGeckoLibAssets = minecraft_version in setOf("1.21.1", "1.21.3", "1.21.4")
+
 tasks.processResources {
     inputs.property("version", project.version)
     inputs.property("minecraft_version", minecraft_version)
     inputs.property("loader_version", loader_version)
+    inputs.property("resource_pack_format", resourcePackFormat)
+    inputs.property("data_pack_format", dataPackFormat)
     filteringCharset = "UTF-8"
 
     filesMatching("fabric.mod.json") {
@@ -99,6 +103,24 @@ tasks.processResources {
             "minecraft_version" to minecraft_version,
             "loader_version" to loader_version
         )
+    }
+
+    filesMatching("pack.mcmeta") {
+        expand(
+            "resource_pack_format" to resourcePackFormat,
+            "data_pack_format" to dataPackFormat
+        )
+    }
+
+    if (usesLegacyGeckoLibAssets) {
+        sourceSets.main.get().resources.srcDirs.forEach { srcDir ->
+            from(File(srcDir, "assets/ddv_fishing/geckolib/animations")) {
+                into("assets/ddv_fishing/animations")
+            }
+            from(File(srcDir, "assets/ddv_fishing/geckolib/models")) {
+                into("assets/ddv_fishing/geo")
+            }
+        }
     }
 }
 

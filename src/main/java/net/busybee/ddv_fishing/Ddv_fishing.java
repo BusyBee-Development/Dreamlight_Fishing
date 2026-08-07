@@ -2,6 +2,7 @@ package net.busybee.ddv_fishing;
 
 import net.busybee.ddv_fishing.networking.ModPackets;
 import net.busybee.ddv_fishing.registry.ModEntities;
+import net.busybee.ddv_fishing.registry.ModItems;
 import net.busybee.ddv_fishing.world.RippleSpawner;
 import net.fabricmc.api.ModInitializer;
 
@@ -12,6 +13,7 @@ public class Ddv_fishing implements ModInitializer {
     public void onInitialize() {
         CONFIG = ModConfig.load();
         ModEntities.register();
+        ModItems.register();
         ModPackets.registerPayloads();
         ModPackets.registerServerHandlers();
         RippleSpawner.register();

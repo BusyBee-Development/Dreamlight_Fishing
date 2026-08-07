@@ -41,13 +41,7 @@ public class RippleSpawner {
                         FishingRippleEntity ripple = new FishingRippleEntity(ModEntities.FISHING_RIPPLE, world);
                         ripple.refreshPositionAndAngles(x + 0.5, y + 1.0, z + 0.5, 0, 0);
 
-                        float r = world.getRandom().nextFloat();
-                        if (Ddv_fishing.CONFIG.luck_affects_rarity) {
-                            r -= player.getLuck() * 0.05f;
-                        }
-                        int rarity = r < 0.7f ? 0 : (r < 0.9f ? 1 : 2);
-                        rarity = Math.max(0, Math.min(2, rarity));
-                        ripple.setRarity(rarity);
+                        ripple.setRarity(rollRarity(world, player));
                         
                         world.spawnEntity(ripple);
                         return;
@@ -55,6 +49,36 @@ public class RippleSpawner {
                 }
             }
         }
+    }
+
+    /**
+     * Picks a ripple rarity: 0 blue, 1 green, 2 orange.
+     * <p>
+     * Reads the two chances from config so the mix can be tuned - and so orange can be turned up
+     * to test, since at its 10% default you can fish for a long while without ever meeting one.
+     * <p>
+     * Luck raises the roll rather than lowering it. It used to subtract, which pushed every lucky
+     * player towards blue: exactly backwards, and on by default.
+     */
+    private static int rollRarity(ServerWorld world, ServerPlayerEntity player) {
+        float orange = Math.max(0.0f, Ddv_fishing.CONFIG.orange_ripple_chance);
+        float green = Math.max(0.0f, Ddv_fishing.CONFIG.green_ripple_chance);
+        // A misconfigured pair that sums past 1 would make blue unreachable and orange's own
+        // threshold negative, so scale them back into range instead of trusting the file.
+        if (orange + green > 1.0f) {
+            float scale = 1.0f / (orange + green);
+            orange *= scale;
+            green *= scale;
+        }
+
+        float r = world.getRandom().nextFloat();
+        if (Ddv_fishing.CONFIG.luck_affects_rarity) {
+            r += player.getLuck() * 0.05f;
+        }
+
+        if (r >= 1.0f - orange) return 2;
+        if (r >= 1.0f - orange - green) return 1;
+        return 0;
     }
 
     private static boolean isNearLand(ServerWorld world, BlockPos pos, int range) {
