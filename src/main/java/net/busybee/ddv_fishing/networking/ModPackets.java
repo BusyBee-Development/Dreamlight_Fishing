@@ -2,6 +2,7 @@ package net.busybee.ddv_fishing.networking;
 
 import net.busybee.ddv_fishing.FishingLootHandler;
 import net.busybee.ddv_fishing.access.FishingBobberReelAccess;
+import net.busybee.ddv_fishing.entity.FishingRippleEntity;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.projectile.FishingBobberEntity;
@@ -18,47 +19,84 @@ public class ModPackets {
         PayloadTypeRegistry.playS2C().register(FishingMinigameS2CPacket.ID, FishingMinigameS2CPacket.CODEC);
         PayloadTypeRegistry.playC2S().register(FishingMinigameResultC2SPacket.ID, FishingMinigameResultC2SPacket.CODEC);
         PayloadTypeRegistry.playC2S().register(FishingMinigamePhaseC2SPacket.ID, FishingMinigamePhaseC2SPacket.CODEC);
+        PayloadTypeRegistry.playC2S().register(FishingMinigameHitC2SPacket.ID, FishingMinigameHitC2SPacket.CODEC);
     }
 
     public static void registerServerHandlers() {
-        ServerPlayNetworking.registerGlobalReceiver(FishingMinigamePhaseC2SPacket.ID, (payload, context) -> {
+        // Each reported hit is checked against the ring speed the server sent and against the
+        // server's own clock. The client is told nothing about the verdict: a rejected hit simply
+        // isn't counted, and the shortfall surfaces when a SUCCESS arrives with the timing phase
+        // still incomplete.
+        ServerPlayNetworking.registerGlobalReceiver(FishingMinigameHitC2SPacket.ID, (payload, context) -> {
             ServerPlayerEntity player = context.player();
             FishingBobberEntity bobber = player.fishHook;
             if (bobber instanceof FishingBobberReelAccess reelAccess) {
-                reelAccess.ddv$setRippleState(payload.phase());
+                reelAccess.ddv$registerTimingHit(payload.ticksSinceReset());
             }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(FishingMinigamePhaseC2SPacket.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            FishingBobberEntity bobber = player.fishHook;
+            if (!(bobber instanceof FishingBobberReelAccess reelAccess)) return;
+
+            // Entering the reeling phase starts the server's clock for it, and is refused outright
+            // if the timing phase was never actually completed.
+            if (payload.phase() == FishingRippleEntity.STATE_REELING && !reelAccess.ddv$beginReeling()) {
+                return;
+            }
+            reelAccess.ddv$setRippleState(payload.phase());
         });
 
         ServerPlayNetworking.registerGlobalReceiver(FishingMinigameResultC2SPacket.ID, (payload, context) -> {
             ServerPlayerEntity player = context.player();
             FishingBobberEntity bobber = player.fishHook;
-            if (bobber == null || bobber.isRemoved() || !((FishingBobberReelAccess) bobber).ddv$consumeMinigameResult()) {
+            if (bobber == null || bobber.isRemoved() || !(bobber instanceof FishingBobberReelAccess reelAccess)) {
                 return;
             }
 
-            if (payload.result() != MinigameResult.SUCCESS) {
-                if (payload.result() == MinigameResult.SNAP) {
+            int rarity = reelAccess.ddv$getRarity();
+            // The server's own verdict, built from the hits it validated. The client used to send
+            // this and was believed.
+            boolean isPerfect = reelAccess.ddv$isPerfectCatch();
+            // A success the server can't account for is downgraded rather than refused, so the
+            // bobber and ripple are still cleaned up instead of being left stuck mid-minigame.
+            MinigameResult result = payload.result();
+            if (result == MinigameResult.SUCCESS
+                    && !(reelAccess.ddv$isTimingComplete() && reelAccess.ddv$canCompleteReeling())) {
+                result = MinigameResult.ESCAPE;
+            }
+
+            // Consumed last so the checks above read live state. Also the one-shot guard: a
+            // duplicate result packet finds the minigame already claimed and gets nothing.
+            if (!reelAccess.ddv$consumeMinigameResult()) {
+                return;
+            }
+
+            if (result != MinigameResult.SUCCESS) {
+                if (result == MinigameResult.SNAP) {
                     player.sendMessage(Text.literal("Your line snapped!"), true);
-                    FishingLootHandler.damageFishingRod(player, 5 + context.player().getRandom().nextInt(5));
-                } else {
+                    FishingLootHandler.damageFishingRod(player, 5 + player.getRandom().nextInt(5));
+                } else if (result == MinigameResult.ESCAPE) {
                     player.sendMessage(Text.literal("The fish got away..."), true);
                     FishingLootHandler.damageFishingRod(player, 1);
                 }
+                // CANCEL is silent and free - the player didn't fail, the minigame was called off
+                // because they died, disconnected, or reeled the line back in.
                 bobber.discard();
                 player.fishHook = null;
                 return;
             }
 
-            int rarity = ((FishingBobberReelAccess) bobber).ddv$getRarity();
             List<ItemStack> loot = FishingLootHandler.generateLoot(player, bobber, rarity);
-            FishingLootHandler.catchFish(player, bobber, loot, payload.isPerfect());
+            FishingLootHandler.catchFish(player, bobber, loot, isPerfect);
             player.fishHook = null;
-            
-            MutableText message = Text.literal(payload.isPerfect() ? "Perfect Catch! Caught " : "Caught ");
+
+            MutableText message = Text.literal(isPerfect ? "Perfect Catch! Caught " : "Caught ");
             for (int i = 0; i < loot.size(); i++) {
                 ItemStack stack = loot.get(i);
                 int count = stack.getCount();
-                if (payload.isPerfect() && !FishingLootHandler.isSpecialItem(stack)) {
+                if (isPerfect && !FishingLootHandler.isSpecialItem(stack)) {
                     count *= 2;
                 }
 

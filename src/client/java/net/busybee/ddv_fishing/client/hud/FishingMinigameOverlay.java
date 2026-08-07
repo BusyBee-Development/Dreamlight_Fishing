@@ -1,7 +1,9 @@
 package net.busybee.ddv_fishing.client.hud;
 
+import net.busybee.ddv_fishing.MinigameRules;
 import net.busybee.ddv_fishing.entity.FishingRippleEntity;
 import net.busybee.ddv_fishing.item.MagicalFishingRodItem;
+import net.busybee.ddv_fishing.networking.FishingMinigameHitC2SPacket;
 import net.busybee.ddv_fishing.networking.FishingMinigameResultC2SPacket;
 import net.busybee.ddv_fishing.networking.FishingMinigamePhaseC2SPacket;
 import net.busybee.ddv_fishing.networking.MinigameResult;
@@ -24,11 +26,19 @@ public class FishingMinigameOverlay {
         REELING
     }
 
+    /**
+     * How long the bobber may be missing client-side before the minigame gives up on it.
+     * <p>
+     * Not zero, because entity tracking drops out briefly on chunk boundaries and a rod at the edge
+     * of the player's view would otherwise cancel a perfectly good catch.
+     */
+    private static final int MISSING_HOOK_GRACE = 10;
+
     private static boolean active = false;
     private static Phase phase = Phase.TIMING;
-    private static float ringScale = 2.0f;
-    private static float prevRingScale = 2.0f;
-    private static float targetScale = 0.5f;
+    private static float ringScale = MinigameRules.RING_START;
+    private static float prevRingScale = MinigameRules.RING_START;
+    private static float targetScale = MinigameRules.TARGET_SCALE;
     private static int requiredHits = 3;
     private static int currentHits = 0;
     private static float speed = 0.02f;
@@ -37,6 +47,9 @@ public class FishingMinigameOverlay {
     private static int swingTicker = 0;
     private static boolean chimePlayed = false;
     private static int postMinigameCooldown = 0;
+    /** Ticks the ring has been closing since it last restarted - the server judges hits by this. */
+    private static int ticksSinceReset = 0;
+    private static int missingHookTicks = 0;
 
     private static float tension = 0.0f;
     private static float reelProgress = 0.0f;
@@ -51,17 +64,16 @@ public class FishingMinigameOverlay {
         requiredHits = hits;
         fishRarity = rarity;
         tension = 0.0f;
-        reelProgress = 0.25f; // Start at 25% progress
+        reelProgress = MinigameRules.REEL_START_PROGRESS;
         isPerfect = true;
-        
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.world != null && client.world.isRaining()) {
-            difficultySpeed *= 1.2f;
-        }
-        
+
+        // The speed arrives fully cooked. Weather used to be applied again here, which left the
+        // client running a faster ring than the server thought it had sent.
         speed = difficultySpeed;
-        ringScale = 2.0f;
-        prevRingScale = 2.0f;
+        ringScale = MinigameRules.RING_START;
+        prevRingScale = MinigameRules.RING_START;
+        ticksSinceReset = 0;
+        missingHookTicks = 0;
         actionCooldown = 0;
         soundTicker = 0;
         swingTicker = 0;
@@ -69,8 +81,30 @@ public class FishingMinigameOverlay {
         MagicalFishingRodItem.setClientAnimState(MagicalFishingRodItem.ANIM_BITE);
     }
 
+    /**
+     * Calls the minigame off without it being the player's fault.
+     * <p>
+     * Tells the server too, otherwise the bobber sits with {@code minigameActive} set forever: the
+     * player's next cast is refused because the old hook is still mid-minigame.
+     */
     public static void stop() {
+        if (active) {
+            ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(MinigameResult.CANCEL));
+        }
         active = false;
+        lastResult = MinigameResult.CANCEL;
+        postMinigameCooldown = 0;
+        MagicalFishingRodItem.setClientAnimState(MagicalFishingRodItem.ANIM_IDLE);
+    }
+
+    /**
+     * Drops the minigame without telling the server. For the cases where there is no connection
+     * left to tell - so the static state doesn't leak into the next world the player joins.
+     */
+    public static void reset() {
+        active = false;
+        postMinigameCooldown = 0;
+        missingHookTicks = 0;
         MagicalFishingRodItem.setClientAnimState(MagicalFishingRodItem.ANIM_IDLE);
     }
 
@@ -80,6 +114,27 @@ public class FishingMinigameOverlay {
         }
 
         if (!active) return;
+
+        // Nothing else clears these. Without the check a player who dies or whose line is cut
+        // mid-minigame keeps a HUD they cannot dismiss, and MinecraftClientMixin goes on eating
+        // their clicks - they can neither fish nor use any other item.
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null || client.world == null) {
+            reset();
+            return;
+        }
+        if (!client.player.isAlive()) {
+            stop();
+            return;
+        }
+        if (client.player.fishHook == null) {
+            if (++missingHookTicks > MISSING_HOOK_GRACE) {
+                stop();
+                return;
+            }
+        } else {
+            missingHookTicks = 0;
+        }
 
         if (phase == Phase.TIMING) {
             tickTiming();
@@ -95,6 +150,9 @@ public class FishingMinigameOverlay {
 
         prevRingScale = ringScale;
         ringScale -= speed;
+        // Kept in step with ringScale so the server can rebuild the same value from the speed it
+        // sent. Increment and subtraction must stay adjacent or the two sides drift by a tick.
+        ticksSinceReset++;
 
         if (swingTicker <= 0) {
             MinecraftClient client = MinecraftClient.getInstance();
@@ -131,7 +189,7 @@ public class FishingMinigameOverlay {
         
         if (soundTicker > 0) soundTicker--;
 
-        if (ringScale < 0.2f) {
+        if (ringScale < MinigameRules.RING_FAIL_SCALE) {
             fail(MinigameResult.ESCAPE);
         }
     }
@@ -139,11 +197,11 @@ public class FishingMinigameOverlay {
     private static void tickReeling() {
         MinecraftClient client = MinecraftClient.getInstance();
         boolean isReeling = client.options.useKey.isPressed();
-        
-        float resistance = 0.004f + (fishRarity * 0.003f);
-        float tensionGain = 0.015f + (fishRarity * 0.005f);
-        float progressGain = 0.012f - (fishRarity * 0.002f);
-        
+
+        float resistance = MinigameRules.resistanceFor(fishRarity);
+        float tensionGain = MinigameRules.tensionGainFor(fishRarity);
+        float progressGain = MinigameRules.progressGainFor(fishRarity);
+
         if (isReeling) {
             tension += tensionGain;
             reelProgress += progressGain;
@@ -153,7 +211,7 @@ public class FishingMinigameOverlay {
                 swingTicker = 6;
             }
         } else {
-            tension -= 0.02f;
+            tension -= MinigameRules.TENSION_RELIEF;
             reelProgress -= resistance;
         }
         
@@ -295,23 +353,25 @@ public class FishingMinigameOverlay {
     }
 
     public static boolean isSafeToClick() {
-        float margin = 0.12f;
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.world != null && client.world.isThundering()) {
-            margin = 0.08f;
-        }
-        return Math.abs(ringScale - targetScale) < margin;
+        boolean thundering = client.world != null && client.world.isThundering();
+        return Math.abs(ringScale - targetScale) < MinigameRules.hitMargin(thundering);
     }
 
     public static void onAction() {
         if (!active || actionCooldown > 0 || phase != Phase.TIMING) return;
 
         if (isSafeToClick()) {
-            boolean currentPerfect = Math.abs(ringScale - targetScale) < 0.05f;
+            boolean currentPerfect = Math.abs(ringScale - targetScale) < MinigameRules.PERFECT_MARGIN;
             if (!currentPerfect) isPerfect = false;
-            
+
             currentHits++;
-            ringScale = 2.0f;
+            // Reported before the reset so the server sees the ring time this hit was made at. It
+            // keeps its own count from these; the local one below only drives the HUD.
+            ClientPlayNetworking.send(new FishingMinigameHitC2SPacket(ticksSinceReset));
+
+            ringScale = MinigameRules.RING_START;
+            ticksSinceReset = 0;
             soundTicker = 0;
             chimePlayed = false;
             actionCooldown = 10;
@@ -331,7 +391,9 @@ public class FishingMinigameOverlay {
         lastResult = MinigameResult.SUCCESS;
         postMinigameCooldown = 40;
         MagicalFishingRodItem.setClientAnimState(MagicalFishingRodItem.ANIM_IDLE);
-        ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(MinigameResult.SUCCESS, isPerfect));
+        // No perfect flag: the server decided that from the hits it validated. The local flag still
+        // drives the on-screen message, and the server's chat line is the authoritative one.
+        ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(MinigameResult.SUCCESS));
     }
 
     private static void fail(MinigameResult result) {
@@ -339,7 +401,7 @@ public class FishingMinigameOverlay {
         lastResult = result;
         postMinigameCooldown = 40;
         MagicalFishingRodItem.setClientAnimState(MagicalFishingRodItem.ANIM_IDLE);
-        ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(result, false));
+        ClientPlayNetworking.send(new FishingMinigameResultC2SPacket(result));
     }
 
     public static boolean isActive() {

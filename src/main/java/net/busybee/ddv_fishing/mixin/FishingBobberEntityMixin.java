@@ -1,6 +1,8 @@
 package net.busybee.ddv_fishing.mixin;
 
+import net.busybee.ddv_fishing.Ddv_fishing;
 import net.busybee.ddv_fishing.FishingLootHandler;
+import net.busybee.ddv_fishing.MinigameRules;
 import net.busybee.ddv_fishing.access.FishingBobberReelAccess;
 import net.busybee.ddv_fishing.entity.FishingRippleEntity;
 import net.busybee.ddv_fishing.networking.FishingMinigameS2CPacket;
@@ -33,6 +35,45 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
 
     @Unique
     private FishingRippleEntity activeRipple;
+
+    /**
+     * Slack in ticks when comparing the client's claimed ring time against the server's own clock.
+     * <p>
+     * The server measures from when it received the previous hit, which is later than when the
+     * client actually reset its ring, so under jitter a legitimate claim can run a tick or two
+     * ahead. This is wide enough to absorb that and still nowhere near the ~50 ticks a forged
+     * "instant hit" would have to invent.
+     */
+    @Unique
+    private static final int DDV_TICK_SLACK = 5;
+
+    /** Same idea for the reeling phase, where the count is longer and one bad tick matters less. */
+    @Unique
+    private static final int DDV_REEL_SLACK = 10;
+
+    /** Ring speed as sent to the client, weather and config already folded in. */
+    @Unique
+    private float ddv$minigameSpeed;
+
+    /** Hits the server requires before it will accept the reeling phase. */
+    @Unique
+    private int ddv$requiredHits;
+
+    @Unique
+    private int ddv$hitCount;
+
+    /** Server time the ring was last known to have restarted. */
+    @Unique
+    private long ddv$lastRingReset;
+
+    @Unique
+    private boolean ddv$timingComplete;
+
+    @Unique
+    private boolean ddv$perfect;
+
+    @Unique
+    private long ddv$reelStart = -1L;
 
     /**
      * True when the bobber's owner is holding a fishing rod of any kind in either hand.
@@ -98,6 +139,9 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
         }
 
         if (world.isClient() || this.minigameActive || bobber.getHookedEntity() != null || bobber.isRemoved()) return;
+        // With the mod disabled the rod must behave exactly like a vanilla rod. Without this the
+        // spawner stops making ripples but any ripple still in the world keeps hooking players.
+        if (!Ddv_fishing.CONFIG.enabled) return;
         if (!ddv$holdsFishingRod()) return;
 
         List<FishingRippleEntity> ripples = world.getEntitiesByClass(
@@ -126,21 +170,109 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
     @Unique
     private void startMinigame(FishingBobberEntity bobber, FishingRippleEntity ripple) {
         if (bobber.getOwner() instanceof ServerPlayerEntity player) {
+            //? if >1.21.8 {
+            World world = bobber.getEntityWorld();
+            //?} else {
+            /*World world = bobber.getWorld();
+            *///?}
+
             this.minigameActive = true;
             this.rippleRarity = ripple.getRarity();
-            int hits = switch (ripple.getRarity()) {
-                case 1 -> 3;
-                case 2 -> 4;
-                default -> 2;
-            };
-            float speed = switch (ripple.getRarity()) {
-                case 1 -> 0.035f;
-                case 2 -> 0.05f;
-                default -> 0.025f;
-            } * net.busybee.ddv_fishing.Ddv_fishing.CONFIG.minigame_difficulty_multiplier;
 
-            ServerPlayNetworking.send(player, new FishingMinigameS2CPacket(hits, speed, ripple.getRarity()));
+            int hits = MinigameRules.hitsFor(this.rippleRarity);
+            float speed = MinigameRules.baseSpeedFor(this.rippleRarity)
+                    * Ddv_fishing.CONFIG.minigame_difficulty_multiplier;
+            // Rain used to be applied on the client after the packet arrived, which meant the two
+            // sides disagreed about how fast the ring was closing - and the server can't check a
+            // hit against a speed it doesn't know. Folded in here so the sent value is final.
+            if (world.isRaining()) {
+                speed *= MinigameRules.RAIN_SPEED_MULTIPLIER;
+            }
+
+            this.ddv$minigameSpeed = speed;
+            this.ddv$requiredHits = hits;
+            this.ddv$hitCount = 0;
+            this.ddv$timingComplete = false;
+            this.ddv$perfect = true;
+            this.ddv$reelStart = -1L;
+            this.ddv$lastRingReset = world.getTime();
+
+            ServerPlayNetworking.send(player, new FishingMinigameS2CPacket(hits, speed, this.rippleRarity));
         }
+    }
+
+    @Override
+    public boolean ddv$registerTimingHit(int claimedTicksSinceReset) {
+        if (!this.minigameActive || this.ddv$timingComplete) return false;
+        if (claimedTicksSinceReset < 0) return false;
+
+        FishingBobberEntity bobber = (FishingBobberEntity)(Object)this;
+        //? if >1.21.8 {
+        long now = bobber.getEntityWorld().getTime();
+        //?} else {
+        /*long now = bobber.getWorld().getTime();
+        *///?}
+
+        // A client claiming more ring time than has actually passed is compressing the minigame -
+        // the shape an auto-completer takes, firing every hit in one tick.
+        if (claimedTicksSinceReset > (now - this.ddv$lastRingReset) + DDV_TICK_SLACK) return false;
+
+        float diff = Math.abs(MinigameRules.ringScaleAt(claimedTicksSinceReset, this.ddv$minigameSpeed)
+                - MinigameRules.TARGET_SCALE);
+        // Always judged against the wide margin. A storm tightens the client's window, and weather
+        // can turn between the click and this check, so being lenient here can only ever accept a
+        // hit the player really did land - never reject one.
+        if (diff > MinigameRules.HIT_MARGIN) return false;
+
+        if (diff > MinigameRules.PERFECT_MARGIN) {
+            this.ddv$perfect = false;
+        }
+
+        this.ddv$hitCount++;
+        this.ddv$lastRingReset = now;
+        if (this.ddv$hitCount >= this.ddv$requiredHits) {
+            this.ddv$timingComplete = true;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean ddv$isTimingComplete() {
+        return this.ddv$timingComplete;
+    }
+
+    @Override
+    public boolean ddv$isPerfectCatch() {
+        return this.ddv$perfect;
+    }
+
+    @Override
+    public boolean ddv$beginReeling() {
+        if (!this.minigameActive || !this.ddv$timingComplete || this.ddv$reelStart != -1L) return false;
+
+        FishingBobberEntity bobber = (FishingBobberEntity)(Object)this;
+        //? if >1.21.8 {
+        this.ddv$reelStart = bobber.getEntityWorld().getTime();
+        //?} else {
+        /*this.ddv$reelStart = bobber.getWorld().getTime();
+        *///?}
+        return true;
+    }
+
+    @Override
+    public boolean ddv$canCompleteReeling() {
+        if (!this.ddv$timingComplete || this.ddv$reelStart == -1L) return false;
+
+        FishingBobberEntity bobber = (FishingBobberEntity)(Object)this;
+        //? if >1.21.8 {
+        long elapsed = bobber.getEntityWorld().getTime() - this.ddv$reelStart;
+        //?} else {
+        /*long elapsed = bobber.getWorld().getTime() - this.ddv$reelStart;
+        *///?}
+
+        // Filling the progress bar takes a known minimum number of ticks even with the key held
+        // down the whole way, so a success that arrives sooner than that never happened.
+        return elapsed >= MinigameRules.minReelTicks(this.rippleRarity) - DDV_REEL_SLACK;
     }
 
     @Override
@@ -151,6 +283,9 @@ public abstract class FishingBobberEntityMixin implements FishingBobberReelAcces
 
         this.minigameActive = false;
         this.rippleBiteDelay = -1;
+        this.ddv$timingComplete = false;
+        this.ddv$hitCount = 0;
+        this.ddv$reelStart = -1L;
         if (this.activeRipple != null) {
             this.activeRipple.discard();
             this.activeRipple = null;

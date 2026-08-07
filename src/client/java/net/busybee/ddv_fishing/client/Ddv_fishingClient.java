@@ -11,6 +11,7 @@ import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.render.entity.EmptyEntityRenderer;
 //? if >=1.21.6 {
@@ -53,6 +54,10 @@ public class Ddv_fishingClient implements ClientModInitializer {
                 FishingMinigameOverlay.tick();
             }
         });
+
+        // The overlay's state is static, so leaving a world mid-minigame would carry the active
+        // HUD - and the click interception that comes with it - into the next world joined.
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> FishingMinigameOverlay.reset());
 
         ModPacketsClient.registerHandlers();
     }

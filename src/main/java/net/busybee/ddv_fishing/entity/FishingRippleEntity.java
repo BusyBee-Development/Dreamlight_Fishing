@@ -1,5 +1,6 @@
 package net.busybee.ddv_fishing.entity;
 
+import net.busybee.ddv_fishing.Ddv_fishing;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.damage.DamageSource;
@@ -122,7 +123,10 @@ public class FishingRippleEntity extends Entity implements GeoEntity {
         /*World world = this.getWorld();
         *///?}
         if (world instanceof ServerWorld serverWorld) {
-            if (this.age > maxAge) {
+            // Turning the mod off stops new ripples spawning, but existing ones would otherwise
+            // sit there churning particles until they aged out - up to a minute of a feature the
+            // server owner just disabled.
+            if (!Ddv_fishing.CONFIG.enabled || this.age > maxAge) {
                 this.discard();
             } else {
                 spawnParticles(serverWorld);

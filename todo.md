@@ -9,16 +9,20 @@
     - [x] Create visual/text cues for "Fish got away" vs. "Line snapped"
     - [x] Add a small durability penalty for snaps to make the reeling phase meaningful
     - [x] Add basic fishing rod
-- [ ] **Close the core-loop gaps**
-  - [ ] Wire up `FishingMinigameOverlay.stop()` — cancel on death, disconnect,
-    dimension change, and bobber removal (currently dead code)
-  - [ ] Move minigame validation server-side; don't trust client-sent
-    SUCCESS/isPerfect
-  - [ ] Declare GeckoLib in `fabric.mod.json` depends
-  - [ ] Scope rod animation state per-stack instead of a global static
-  - [ ] Verify the reeling animation actually plays in game
-  - [ ] Sit ripple rings flush with the water surface
-  - [ ] Make `enabled = false` disable the minigame, not just spawning
+- [x] **Close the core-loop gaps**
+  - [x] Wire up `FishingMinigameOverlay.stop()` — cancels on death, on the bobber
+    going away (10-tick grace for tracking dropouts), and on disconnect. Sends
+    `MinigameResult.CANCEL` so the server clears `minigameActive` too
+  - [x] Move minigame validation server-side; don't trust client-sent
+    SUCCESS/isPerfect. Rules shared via `MinigameRules`; each hit reported by
+    `FishingMinigameHitC2SPacket` and re-judged against the server's own clock;
+    perfect is now the server's verdict and the field is gone from the packet
+  - [x] Declare GeckoLib in `fabric.mod.json` depends
+  - [x] Scope rod animation state per-stack instead of a global static — resolved
+    per render state in the renderer, idle for anything but your own held rod
+  - [x] Verify the reeling animation actually plays in game
+  - [x] Sit ripple rings flush with the water surface
+  - [x] Make `enabled = false` disable the minigame, not just spawning
 
 ## Phase 2: Content & Biome Depth
 - [ ] **Use existing biome detection for specific catches**

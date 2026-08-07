@@ -7,6 +7,7 @@ import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.constant.dataticket.DataTicket;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
@@ -32,21 +33,35 @@ public class MagicalFishingRodItem extends FishingRodItem implements GeoItem {
     public static final int ANIM_REELING = 2;
 
     /**
-     * Which animation the rod should be playing, as the local client sees it.
+     * The animation state, carried per render state rather than read from the static field.
+     * <p>
+     * The renderer resolves it to {@link #ANIM_IDLE} for anyone who isn't the local player, which
+     * is what keeps the minigame off other people's rods. The controller reads this ticket, so the
+     * decision lives in one place instead of being baked into the shared field.
+     */
+    public static final DataTicket<Integer> ANIM_STATE = DataTicket.create("ddv_anim_state", Integer.class);
+
+    /**
+     * Which animation the local player's rod should be playing.
      * <p>
      * The minigame is a client-side HUD, so its phase never reaches the server and there is no
-     * per-stack state to read. {@code FishingMinigameOverlay} pushes the phase in here and the
-     * animation controller picks it up on the next frame.
+     * per-stack state to read. {@code FishingMinigameOverlay} pushes the phase in here, the renderer
+     * copies it onto the render state via {@link #ANIM_STATE}, and the controller reads it there.
      * <p>
-     * Deliberately global rather than per-stack: GeckoLib gives an item one shared animatable
-     * instance, so telling two players' rods apart would need synced per-stack ids. The visible
-     * cost is that in multiplayer, another player's rod may animate along with your own reel.
+     * Still one field, because the local player has only one minigame at a time - but it no longer
+     * reaches the controller directly. It used to, which meant every visible rod in multiplayer
+     * animated along with your reel, and your own hotbar icon did too.
      */
     private static volatile int clientAnimState = ANIM_IDLE;
 
     /** @param state one of {@link #ANIM_IDLE}, {@link #ANIM_BITE}, {@link #ANIM_REELING}. */
     public static void setClientAnimState(int state) {
         clientAnimState = state;
+    }
+
+    /** Read by the renderer when it decides what to stamp onto a render state. */
+    public static int getClientAnimState() {
+        return clientAnimState;
     }
 
     /**
@@ -82,7 +97,7 @@ public class MagicalFishingRodItem extends FishingRodItem implements GeoItem {
         // Re-evaluated every frame. setAndContinue only restarts the animation when the chosen
         // RawAnimation actually changes, so holding a state keeps it looping rather than
         // retriggering it. The 4-tick transition blends the bone poses between states.
-        controllers.add(new AnimationController<>("controller", 4, state -> switch (clientAnimState) {
+        controllers.add(new AnimationController<>("controller", 4, state -> switch (state.getDataOrDefault(ANIM_STATE, ANIM_IDLE)) {
             case ANIM_BITE -> state.setAndContinue(BITE);
             case ANIM_REELING -> state.setAndContinue(REELING);
             default -> state.setAndContinue(IDLE);

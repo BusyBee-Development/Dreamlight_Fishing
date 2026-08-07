@@ -12,6 +12,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 public class RippleSpawner {
+    /** Height a full still-water block's surface actually renders at, relative to the block base. */
+    private static final double WATER_SURFACE_HEIGHT = 8.0 / 9.0;
+
     public static void register() {
         ServerTickEvents.END_WORLD_TICK.register(world -> {
             if (Ddv_fishing.CONFIG.enabled && world.getServer().getTicks() % 20 == 0) {
@@ -39,7 +42,10 @@ public class RippleSpawner {
 
                     if (attempt > 15 || isNearLand(world, checkPos, 6)) {
                         FishingRippleEntity ripple = new FishingRippleEntity(ModEntities.FISHING_RIPPLE, world);
-                        ripple.refreshPositionAndAngles(x + 0.5, y + 1.0, z + 0.5, 0, 0);
+                        // Still water renders its surface at 8/9 of a block, not the block top, so
+                        // y + 1.0 left the ring hovering visibly above the water. The extra sliver
+                        // keeps the flat plate from z-fighting with the surface it sits on.
+                        ripple.refreshPositionAndAngles(x + 0.5, y + WATER_SURFACE_HEIGHT + 0.01, z + 0.5, 0, 0);
 
                         ripple.setRarity(rollRarity(world, player));
                         
