@@ -40,6 +40,7 @@ repositories {
     maven("https://maven.fabricmc.net/")
     maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/")
     maven("https://api.modrinth.com/maven")
+    maven("https://repo.faststats.dev/releases")
     mavenCentral()
 }
 
@@ -73,6 +74,20 @@ dependencies {
             modImplementation("$gGroup:geckolib-fabric-$minecraft_version:$v")
         }
     }
+
+    val mcMinor = minecraft_version.substringAfterLast(".").toIntOrNull() ?: 0
+    val fsFabricVersion = if (mcMinor >= 9) "0.29.4+mc1.21.9-1.21.11" else "0.29.4+mc1.18-1.21.8"
+
+    modImplementation("dev.faststats.metrics:fabric:$fsFabricVersion")
+    include("dev.faststats.metrics:fabric:$fsFabricVersion")
+    modImplementation("dev.faststats.metrics:core:0.29.4")
+    include("dev.faststats.metrics:core:0.29.4")
+    modImplementation("dev.faststats.metrics:config:0.29.4")
+    include("dev.faststats.metrics:config:0.29.4")
+    implementation("org.jspecify:jspecify:1.0.0")
+    include("org.jspecify:jspecify:1.0.0")
+    implementation("org.jetbrains:annotations:26.1.0")
+    include("org.jetbrains:annotations:26.1.0")
 }
 
 val (resourcePackFormat, dataPackFormat) = when (minecraft_version) {
