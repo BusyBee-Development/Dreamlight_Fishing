@@ -23,8 +23,12 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.busybee.ddv_fishing.world.FishBiome;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import java.util.List;
 import java.util.ArrayList;
@@ -41,11 +45,23 @@ public class FishingLootHandler {
         /*ServerWorld world = (ServerWorld) bobber.getWorld();
         *///?}
 
-        Identifier lootTableId = switch (rarity) {
-            case 1 -> Identifier.of("ddv_fishing", "gameplay/fishing/rare");
-            case 2 -> Identifier.of("ddv_fishing", "gameplay/fishing/epic");
-            default -> Identifier.of("ddv_fishing", "gameplay/fishing/common");
+        String rarityName = switch (rarity) {
+            case 1 -> "rare";
+            case 2 -> "epic";
+            default -> "common";
         };
+
+        // Biome-flavoured tables (ocean/swamp/jungle_<rarity>) exist alongside the generic ones;
+        // anywhere else falls back to the plain vanilla-heavy table rather than needing a table
+        // for every biome in the game.
+        FishBiome biome = FishBiome.classify(world, BlockPos.ofFloored(bobber.getX(), bobber.getY(), bobber.getZ()));
+        String biomePrefix = switch (biome) {
+            case OCEAN -> "ocean_";
+            case SWAMP -> "swamp_";
+            case JUNGLE -> "jungle_";
+            case OTHER -> "";
+        };
+        Identifier lootTableId = Identifier.of("ddv_fishing", "gameplay/fishing/" + biomePrefix + rarityName);
 
         //? if >1.21.1 {
         LootWorldContext parameterSet = new LootWorldContext.Builder(world)
@@ -105,6 +121,16 @@ public class FishingLootHandler {
             xp += 5;
             if (hasSpecial) {
                 xp += 20;
+            }
+
+            // One roll, two possible prizes on top of the guaranteed double loot and XP: a bigger
+            // XP top-up most of the time, or - rarer - a taste of Luck for the player to carry into
+            // their next few casts. Mutually exclusive so a single perfect catch doesn't stack both.
+            float bonusRoll = world.random.nextFloat();
+            if (bonusRoll < 0.15f) {
+                xp += world.random.nextBetween(10, 15);
+            } else if (bonusRoll < 0.25f) {
+                player.addStatusEffect(new StatusEffectInstance(StatusEffects.LUCK, 30 * 20, 0));
             }
         }
         if (xp > 0) {

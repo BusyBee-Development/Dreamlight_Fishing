@@ -1,4 +1,10 @@
 {
   "entity.ddv_fishing.fishing_ripple": "Fishing Ripple",
-  "item.ddv_fishing.magical_fishing_rod": "Dreamlight Fishing Rod"
+  "item.ddv_fishing.magical_fishing_rod": "Dreamlight Fishing Rod",
+  "item.ddv_fishing.ocean_pearl": "Ocean Pearl",
+  "item.ddv_fishing.large_fish": "Large Fish",
+  "item.ddv_fishing.algae": "Algae",
+  "item.ddv_fishing.catfish": "Catfish",
+  "item.ddv_fishing.exotic_fish": "Exotic Fish",
+  "item.ddv_fishing.river_piranha": "River Piranha"
 }

@@ -25,13 +25,20 @@
   - [x] Make `enabled = false` disable the minigame, not just spawning
 
 ## Phase 2: Content & Biome Depth
-- [ ] **Use existing biome detection for specific catches**
-    - [ ] Tie the `isSwamp`, `isJungle`, and `isOcean` checks already in `FishingRippleEntity` to the `FishingLootHandler`
-- [ ] **Add custom fish as ripple-tier rewards**
-    - [ ] Define unique items for Ocean (Pearls/Large Fish), Swamp (Algae/Catfish), and Jungle (Tropical/Exotic)
-    - [ ] Replace vanilla loot in `common.json`, `rare.json`, and `epic.json` with these new entries
-- [ ] **Give perfect catches more exciting rewards**
-    - [ ] Beyond double loot, add small chances for bonus XP or temporary "Luck" status effects
+- [x] **Extract shared biome classification**
+    - [x] Pull `isOcean`/`isSwamp`/`isJungle` out of `FishingRippleEntity.spawnParticles()` into a static `FishBiome.classify(ServerWorld, BlockPos)` helper (`OCEAN`/`SWAMP`/`JUNGLE`/`OTHER`)
+    - [x] Update `FishingRippleEntity` to use the helper instead of its inline checks (no behavior change)
+- [x] **Wire biome into loot selection**
+    - [x] `FishingLootHandler.generateLoot()` classifies the bobber's block pos with `FishBiome` and picks `{biome}_{rarity}` when biome != OTHER, else falls back to the existing generic `common`/`rare`/`epic` tables
+- [x] **Add custom fish as ripple-tier rewards (placeholder art)**
+    - [x] Register new items in `ModItems`: Ocean `ocean_pearl` (rare), `large_fish` (epic); Swamp `algae` (common), `catfish` (rare); Jungle `exotic_fish` (rare), `river_piranha` (epic)
+    - [x] Generated-item model + flat placeholder texture per item, swappable later
+    - [x] `en_us.json` lang entries for the new item names
+- [x] **Author biome loot tables**
+    - [x] Create `gameplay/fishing/{ocean,swamp,jungle}_{common,rare,epic}.json` (9 tables), reweighting vanilla fish per biome and layering in the new custom items
+    - [x] Leave `common.json`/`rare.json`/`epic.json` as the untouched `OTHER`-biome fallback
+- [x] **Give perfect catches more exciting rewards**
+    - [x] In `FishingLootHandler.catchFish()`, beyond double loot: ~15% chance of bonus XP, else ~10% chance of a short `Luck` status effect (mutually exclusive, ~25% combined)
 
 ## Phase 3: Immersion & "Game Juice"
 - [ ] **Create custom audio for the entire loop**

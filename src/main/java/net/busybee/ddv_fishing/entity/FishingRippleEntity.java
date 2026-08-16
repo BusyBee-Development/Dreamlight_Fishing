@@ -14,9 +14,9 @@ import net.minecraft.storage.WriteView;
 //? if <=1.21.5 {
 /*import net.minecraft.nbt.NbtCompound;
 *///?}
+import net.busybee.ddv_fishing.world.FishBiome;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -178,10 +178,10 @@ public class FishingRippleEntity extends Entity implements GeoEntity {
             default -> 0;
         };
 
-        var biome = serverWorld.getBiome(this.getBlockPos());
-        boolean isJungle = biome.getKey().map(key -> key.getValue().getPath().contains("jungle")).orElse(false);
-        boolean isSwamp = biome.getKey().map(key -> key.getValue().getPath().contains("swamp")).orElse(false);
-        boolean isOcean = biome.isIn(BiomeTags.IS_OCEAN);
+        FishBiome fishBiome = FishBiome.classify(serverWorld, this.getBlockPos());
+        boolean isJungle = fishBiome == FishBiome.JUNGLE;
+        boolean isSwamp = fishBiome == FishBiome.SWAMP;
+        boolean isOcean = fishBiome == FishBiome.OCEAN;
 
         // A hooked fish pulls the churn in towards the bobber instead of letting it drift wide.
         double spread = state == STATE_IDLE ? 1.1 : 0.7;

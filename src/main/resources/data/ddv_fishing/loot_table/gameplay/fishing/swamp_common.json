@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:fishing",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:cod",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:salmon",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:pufferfish",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:loot_table",
+          "value": "minecraft:gameplay/fishing/junk",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:loot_table",
+          "value": "minecraft:gameplay/fishing/treasure",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "ddv_fishing:algae",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "ddv_fishing:catfish",
+          "weight": 10
+        }
+      ]
+    }
+  ]
+}
