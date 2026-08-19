@@ -88,7 +88,8 @@ public class FishJournalScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context, mouseX, mouseY, delta);
+        // Screen.renderWithTooltip() already calls renderBackground() once before invoking this
+        // method - calling it again here trips "Can only blur once per frame".
         context.fill(panelX, panelY, panelX + PANEL_WIDTH, panelY + panelHeight, 0xC0101010);
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, panelX + PANEL_WIDTH / 2, panelY + 6, 0xFFFFFFFF);
 

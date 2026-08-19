@@ -28,10 +28,10 @@ import net.minecraft.util.Identifier;
 
 public class Ddv_fishingClient implements ClientModInitializer {
 
-    // Unbound by default - not every player wants the journal on a hotkey, and there's no obviously
-    // "right" default key to steal from vanilla.
+    // J is free in vanilla and not claimed by any bundled/likely mod on this modpack, so it's safe
+    // as a default rather than leaving the journal unbound.
     private static final KeyBinding OPEN_JOURNAL_KEY = KeyBindingHelper.registerKeyBinding(
-            new KeyBinding("key.ddv_fishing.open_journal", GLFW.GLFW_KEY_UNKNOWN, KeyBinding.Category.MISC));
+            new KeyBinding("key.ddv_fishing.open_journal", GLFW.GLFW_KEY_J, KeyBinding.Category.MISC));
 
     @Override
     public void onInitializeClient() {

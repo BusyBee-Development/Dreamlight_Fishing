@@ -2,6 +2,8 @@
   "pack": {
     "pack_format": ${resource_pack_format},
     "supported_formats": [${resource_pack_format}, ${data_pack_format}],
+    "min_format": ${resource_pack_format},
+    "max_format": ${data_pack_format},
     "description": "Dreamlight Fishing resources & data"
   }
 }
