@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "ripple_spawn_chance": 0.3,
+  "search_radius": 32,
+  "spawn_in_flowing_water": false,
+  "luck_affects_rarity": true,
+  "minigame_difficulty_multiplier": 1.0,
+  "green_ripple_chance": 0.2,
+  "orange_ripple_chance": 0.1,
+  "perfect_catch_size_rolls": 2
+}

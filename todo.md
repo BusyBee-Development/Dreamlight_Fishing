@@ -50,19 +50,25 @@ systems that already exist for solo play.
 *This is the phase that turns "fun minigame" into "reason to keep playing." Biome
 loot has landed — new fish need somewhere to be tracked.*
 
-- [ ] **Build the fishing journal UI**
-  - [ ] Design the screen layout: species list, per-species "caught/not caught,"
-    largest catch on record, first-catch date
-  - [ ] Populate entries dynamically from the loot table registry so new fish
-    (from Phase 2 work) auto-appear without manual UI updates
-  - [ ] Add biome completion tracking (e.g. "Ocean: 4/7 species caught")
-  - [ ] Persist journal data per-player in save data (and per-player on servers,
-    not shared/global)
-- [ ] **Add catch metadata: size/weight**
-  - [ ] Give each fish species a min-max weight/length range
-  - [ ] Roll size at catch time; bias larger rolls on Perfect Catches
-  - [ ] Track "largest catch" per species in the journal
-  - [ ] Surface size in the catch notification/HUD popup
+- [x] **Build the fishing journal UI**
+  - [x] Design the screen layout: species list, per-species "caught/not caught,"
+    largest catch on record, first-catch date — `FishJournalScreen`, opened via an
+    unbound keybind, built entirely from vanilla widgets/flat panels (no new art)
+  - [x] Populate entries from a hardcoded species registry (`FishSpecies`: the 4
+    vanilla fish + the 6 Phase 2 custom fish) rather than parsing the loot tables
+    at runtime — junk/treasure loot isn't tracked
+  - [x] Add biome completion tracking (e.g. "Ocean: 2/2 species caught") — a
+    species buckets to Ocean/Swamp/Jungle only if exclusive to that biome's
+    tables, everything else (all 4 vanilla fish) falls to a "General" bucket
+  - [x] Persist journal data per-player in save data (and per-player on servers,
+    not shared/global) — Fabric's Data Attachment API, per-player/per-save
+- [x] **Add catch metadata: size/weight**
+  - [x] Give each fish species a min-max weight/length range
+  - [x] Roll size at catch time; bias larger rolls on Perfect Catches — best of
+    `perfect_catch_size_rolls` (config, default 2) uniform rolls
+  - [x] Track "largest catch" per species in the journal
+  - [x] Surface size in the catch notification/HUD popup — action bar message,
+    plus `[NEW SPECIES!]`/`[NEW RECORD!]` tags
 - [ ] **Tie journal completion to unlocks**
   - [ ] Define a capstone reward for full biome completion (legendary ripple
     tier access, a unique cosmetic rod skin, or a craftable-only-after-unlock item)

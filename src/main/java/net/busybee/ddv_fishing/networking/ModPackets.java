@@ -3,6 +3,8 @@ package net.busybee.ddv_fishing.networking;
 import net.busybee.ddv_fishing.FishingLootHandler;
 import net.busybee.ddv_fishing.access.FishingBobberReelAccess;
 import net.busybee.ddv_fishing.entity.FishingRippleEntity;
+import net.busybee.ddv_fishing.journal.FishJournalManager;
+import net.busybee.ddv_fishing.journal.FishSpecies;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.projectile.FishingBobberEntity;
@@ -10,13 +12,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import java.util.List;
+import java.util.Optional;
 
 
 public class ModPackets {
 
     public static void registerPayloads() {
         PayloadTypeRegistry.playS2C().register(FishingMinigameS2CPacket.ID, FishingMinigameS2CPacket.CODEC);
+        PayloadTypeRegistry.playS2C().register(FishJournalS2CPacket.ID, FishJournalS2CPacket.CODEC);
         PayloadTypeRegistry.playC2S().register(FishingMinigameResultC2SPacket.ID, FishingMinigameResultC2SPacket.CODEC);
         PayloadTypeRegistry.playC2S().register(FishingMinigamePhaseC2SPacket.ID, FishingMinigamePhaseC2SPacket.CODEC);
         PayloadTypeRegistry.playC2S().register(FishingMinigameHitC2SPacket.ID, FishingMinigameHitC2SPacket.CODEC);
@@ -106,6 +111,19 @@ public class ModPackets {
                     message.append(Text.literal("a "));
                 }
                 message.append(stack.getName());
+
+                Optional<FishSpecies> species = FishSpecies.fromItem(stack.getItem());
+                if (species.isPresent()) {
+                    FishJournalManager.CatchResult catchResult =
+                            FishJournalManager.recordCatch(player, species.get(), isPerfect);
+                    message.append(Text.literal(" (" + Math.round(catchResult.size()) + "cm)"));
+                    if (catchResult.firstCatch()) {
+                        message.append(Text.translatable("message.ddv_fishing.new_species").formatted(Formatting.GOLD));
+                    } else if (catchResult.newRecord()) {
+                        message.append(Text.translatable("message.ddv_fishing.new_record").formatted(Formatting.AQUA));
+                    }
+                }
+
                 if (i < loot.size() - 1) {
                     message.append(Text.literal(", "));
                 }

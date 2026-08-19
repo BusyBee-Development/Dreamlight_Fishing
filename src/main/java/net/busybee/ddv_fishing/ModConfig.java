@@ -28,6 +28,9 @@ public class ModConfig {
     /** Share of ripples that spawn orange - the hardest catch. The rest spawn blue. */
     public float orange_ripple_chance = 0.10f;
 
+    /** Extra size rolls taken (keeping the largest) on a Perfect Catch - higher values push perfect-catch sizes closer to the max. */
+    public int perfect_catch_size_rolls = 2;
+
     public static ModConfig load() {
         // Logged because the file's location is otherwise guesswork - it sits in the instance's
         // config dir, which is not where people look first.

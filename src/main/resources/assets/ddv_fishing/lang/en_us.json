@@ -6,5 +6,17 @@
   "item.ddv_fishing.algae": "Algae",
   "item.ddv_fishing.catfish": "Catfish",
   "item.ddv_fishing.exotic_fish": "Exotic Fish",
-  "item.ddv_fishing.river_piranha": "River Piranha"
+  "item.ddv_fishing.river_piranha": "River Piranha",
+  "key.ddv_fishing.open_journal": "Open Fishing Journal",
+  "screen.ddv_fishing.journal.title": "Fishing Journal",
+  "screen.ddv_fishing.journal.not_caught": "Not yet caught",
+  "screen.ddv_fishing.journal.largest": "Largest: %scm",
+  "screen.ddv_fishing.journal.first_caught": "First caught: %s",
+  "screen.ddv_fishing.journal.times_caught": "Caught %s×",
+  "screen.ddv_fishing.journal.biome.ocean": "Ocean",
+  "screen.ddv_fishing.journal.biome.swamp": "Swamp",
+  "screen.ddv_fishing.journal.biome.jungle": "Jungle",
+  "screen.ddv_fishing.journal.biome.other": "General",
+  "message.ddv_fishing.new_species": " [NEW SPECIES!]",
+  "message.ddv_fishing.new_record": " [NEW RECORD!]"
 }
