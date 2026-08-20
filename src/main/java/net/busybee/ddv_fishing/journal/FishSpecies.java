@@ -35,7 +35,9 @@ public enum FishSpecies {
     ALGAE(ModItems.ALGAE, FishBiome.SWAMP, 10f, 40f),
     CATFISH(ModItems.CATFISH, FishBiome.SWAMP, 30f, 110f),
     EXOTIC_FISH(ModItems.EXOTIC_FISH, FishBiome.JUNGLE, 8f, 20f),
-    RIVER_PIRANHA(ModItems.RIVER_PIRANHA, FishBiome.JUNGLE, 15f, 35f);
+    RIVER_PIRANHA(ModItems.RIVER_PIRANHA, FishBiome.JUNGLE, 15f, 35f),
+    /** The Legendary capstone catch - see {@link FishBiome#LEGENDARY}. Only reachable once every other species here has been caught. */
+    STARFIN_LEVIATHAN(ModItems.STARFIN_LEVIATHAN, FishBiome.LEGENDARY, 100f, 220f);
 
     private static final FishSpecies[] VALUES = values();
     private static final Map<Item, FishSpecies> BY_ITEM = new HashMap<>();

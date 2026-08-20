@@ -1,0 +1,20 @@
+{
+  "parent": "ddv_fishing:first_catch",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "ddv_fishing:magical_fishing_rod"
+    },
+    "title": {
+      "translate": "advancements.ddv_fishing.first_perfect_catch.title"
+    },
+    "description": {
+      "translate": "advancements.ddv_fishing.first_perfect_catch.description"
+    }
+  },
+  "criteria": {
+    "perfect": {
+      "trigger": "ddv_fishing:first_perfect_catch"
+    }
+  }
+}

@@ -5,6 +5,8 @@ import net.busybee.ddv_fishing.access.FishingBobberReelAccess;
 import net.busybee.ddv_fishing.entity.FishingRippleEntity;
 import net.busybee.ddv_fishing.journal.FishJournalManager;
 import net.busybee.ddv_fishing.journal.FishSpecies;
+import net.busybee.ddv_fishing.registry.ModAttachments;
+import net.busybee.ddv_fishing.registry.ModCriteria;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.projectile.FishingBobberEntity;
@@ -93,9 +95,25 @@ public class ModPackets {
                 return;
             }
 
+            // Lucky Bait (75% milestone reward): one-shot, consumed the instant a catch actually
+            // lands rather than when the item is used, so it can't be "wasted" on a SNAP/ESCAPE.
+            if (!isPerfect && player.getAttachedOrCreate(ModAttachments.GUARANTEED_PERFECT)) {
+                isPerfect = true;
+                player.setAttached(ModAttachments.GUARANTEED_PERFECT, false);
+            }
+
             List<ItemStack> loot = FishingLootHandler.generateLoot(player, bobber, rarity);
             FishingLootHandler.catchFish(player, bobber, loot, isPerfect);
             player.fishHook = null;
+
+            if (isPerfect) {
+                ModCriteria.FIRST_PERFECT_CATCH.trigger(player);
+            }
+            if (rarity == 2) {
+                ModCriteria.FIRST_EPIC_RIPPLE.trigger(player);
+            } else if (rarity == 3) {
+                ModCriteria.FIRST_LEGENDARY_RIPPLE.trigger(player);
+            }
 
             MutableText message = Text.literal(isPerfect ? "Perfect Catch! Caught " : "Caught ");
             for (int i = 0; i < loot.size(); i++) {
@@ -116,6 +134,9 @@ public class ModPackets {
                 if (species.isPresent()) {
                     FishJournalManager.CatchResult catchResult =
                             FishJournalManager.recordCatch(player, species.get(), isPerfect);
+                    if (catchResult.firstCatchEver()) {
+                        ModCriteria.FIRST_CATCH.trigger(player);
+                    }
                     message.append(Text.literal(" (" + Math.round(catchResult.size()) + "cm)"));
                     if (catchResult.firstCatch()) {
                         message.append(Text.translatable("message.ddv_fishing.new_species").formatted(Formatting.GOLD));

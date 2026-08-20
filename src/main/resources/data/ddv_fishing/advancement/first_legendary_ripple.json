@@ -1,0 +1,21 @@
+{
+  "parent": "ddv_fishing:first_epic_ripple",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "ddv_fishing:starfin_leviathan"
+    },
+    "title": {
+      "translate": "advancements.ddv_fishing.first_legendary_ripple.title"
+    },
+    "description": {
+      "translate": "advancements.ddv_fishing.first_legendary_ripple.description"
+    },
+    "frame": "goal"
+  },
+  "criteria": {
+    "legendary": {
+      "trigger": "ddv_fishing:first_legendary_ripple"
+    }
+  }
+}

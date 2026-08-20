@@ -50,7 +50,8 @@ public class FishingRippleEntity extends Entity implements GeoEntity {
     private static final TrackedData<Integer> ACTIVITY_STATE = DataTracker.registerData(FishingRippleEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
     /**
-     * The rarity colour, as packed 0xRRGGBB - blue is the easy catch, green middling, orange hard.
+     * The rarity colour, as packed 0xRRGGBB - blue is the easy catch, green middling, orange hard,
+     * gold is Legendary (unlocked only after full journal completion, see {@code RippleSpawner}).
      * <p>
      * Single source of truth on purpose. The ring tint and the ripple's own dust particles both
      * read it, because they were previously picked independently and ended up contradicting each
@@ -60,6 +61,7 @@ public class FishingRippleEntity extends Entity implements GeoEntity {
         return switch (rarity) {
             case 1 -> 0x5FE08A;
             case 2 -> 0xFF9A3C;
+            case 3 -> 0xFFD24D;
             default -> 0x5AB4FF;
         };
     }
@@ -171,6 +173,7 @@ public class FishingRippleEntity extends Entity implements GeoEntity {
         int count = switch (rarity) {
             case 1 -> 3;
             case 2 -> 4;
+            case 3 -> 6;
             default -> 2;
         } + switch (state) {
             case STATE_BITE -> 3;

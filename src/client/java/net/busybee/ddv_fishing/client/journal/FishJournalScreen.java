@@ -24,7 +24,7 @@ import java.util.Map;
  * there is no art budget for a bespoke journal texture right now.
  */
 public class FishJournalScreen extends Screen {
-    private static final FishBiome[] TABS = {FishBiome.OTHER, FishBiome.OCEAN, FishBiome.SWAMP, FishBiome.JUNGLE};
+    private static final FishBiome[] TABS = {FishBiome.OTHER, FishBiome.OCEAN, FishBiome.SWAMP, FishBiome.JUNGLE, FishBiome.LEGENDARY};
     private static final int ROW_HEIGHT = 22;
     private static final int PANEL_WIDTH = 300;
     private static final DateTimeFormatter DATE_FORMAT =
@@ -83,6 +83,7 @@ public class FishJournalScreen extends Screen {
             case SWAMP -> "screen.ddv_fishing.journal.biome.swamp";
             case JUNGLE -> "screen.ddv_fishing.journal.biome.jungle";
             case OTHER -> "screen.ddv_fishing.journal.biome.other";
+            case LEGENDARY -> "screen.ddv_fishing.journal.biome.legendary";
         };
     }
 

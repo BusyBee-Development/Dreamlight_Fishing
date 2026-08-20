@@ -69,16 +69,61 @@ loot has landed — new fish need somewhere to be tracked.*
   - [x] Track "largest catch" per species in the journal
   - [x] Surface size in the catch notification/HUD popup — action bar message,
     plus `[NEW SPECIES!]`/`[NEW RECORD!]` tags
-- [ ] **Tie journal completion to unlocks**
-  - [ ] Define a capstone reward for full biome completion (legendary ripple
-    tier access, a unique cosmetic rod skin, or a craftable-only-after-unlock item)
-  - [ ] Define smaller milestone rewards at 25%/50%/75% completion so progress
-    feels continuous, not all-or-nothing
-- [ ] **Wire up vanilla advancement integration**
-  - [ ] Advancement for first catch, first Perfect Catch, first Epic ripple catch
-  - [ ] Advancement for full journal completion per biome
-  - [ ] Use vanilla advancement toast/criteria system so it shows up in the
-    normal advancements screen, not a custom one
+- [x] **Tie journal completion to unlocks**
+  - [x] Capstone at 100% completion (all 10 non-Legendary species): unlocks the
+    Legendary ripple tier plus a one-time Legendary rod skin grant, both below
+    — `FishJournalData.isComplete`/`completionFraction` deliberately exclude
+    Starfin Leviathan itself from the denominator, since counting it would
+    make 100% unreachable (can't catch it before the tier is unlocked)
+  - [x] Milestone rewards at 25%/50%/75%, granted once each via a
+    `MILESTONE_REWARDS` bitmask attachment (`FishJournalManager.checkMilestones`,
+    called after every catch):
+    - 25% "Apprentice Angler" - 8 XP bottles + an instant Luck II effect
+      (skipped the drinkable-potion item - same net effect as the existing
+      Perfect Catch bonus, without a `PotionContentsComponent` dependency)
+    - 50% "Seasoned Angler" - permanent +2.5% to green/orange ripple chance
+      for that player, stored on `ModAttachments.RIPPLE_BONUS`
+    - 75% "Master Angler" - one `ddv_fishing:lucky_bait` (placeholder flat-
+      colour icon, same as the Phase 2 fish started out): right-click sets a
+      `GUARANTEED_PERFECT` flag, consumed by `ModPackets` on the next landed
+      catch so it can't be wasted on a SNAP/ESCAPE
+  - [x] Legendary ripple tier: 4th rarity, gold (`0xFFD24D`), gated per-player
+    behind `FishJournalData.isComplete` via `legendary_ripple_chance` (config,
+    `0.02f` default) in `RippleSpawner.rollRarity`; spawns in any biome once
+    unlocked - `FishingLootHandler` skips the biome prefix entirely for rarity
+    3, matching the new fish being "found anywhere". Minigame numbers for
+    rarity 3 (`MinigameRules`) solved against the same winnability inequality
+    used to fix epic, so it's the hardest tier but not another impossible one
+  - [x] New loot table `gameplay/fishing/legendary` - no biome prefix, global
+  - [x] New capstone fish species **Starfin Leviathan** (`FishSpecies`):
+    100-220cm, largest range in the mod, own `FishBiome.LEGENDARY` journal tab;
+    item carries a permanent `ENCHANTMENT_GLINT_OVERRIDE` component for a free
+    "feels special" cue with no extra art needed. Icon art in from Kodari
+  - [x] Legendary rod skin (`LegendaryFishingRodItem`/`LegendaryFishingRodModel`/
+    `LegendaryFishingRodRenderer`): subclasses `MagicalFishingRodItem` to reuse
+    all casting/reeling/animation logic as-is, only the GeckoLib model/texture
+    differ; granted once at the 100% milestone. Rod skin art in from Kodari
+- [x] **Wire up vanilla advancement integration**
+  - [x] Two custom criterion types (`net.busybee.ddv_fishing.advancement`,
+    registered via `ModCriteria`): `SimpleTriggerCriterion` (no extra
+    conditions - "this happened") reused for first catch/Perfect Catch/Epic
+    ripple/Legendary ripple/full completion, and `BiomeCompleteCriterion`
+    (takes a `biome` condition) shared by the three per-biome advancements
+    instead of three near-identical criterion classes
+  - [x] Triggers fired from `ModPackets` (catch-result-dependent ones: first
+    catch, first Perfect Catch, first Epic/Legendary ripple) and
+    `FishJournalManager` (biome/full completion, computed from the journal
+    data it already has). Safe to re-fire on every catch that still satisfies
+    the condition - `PlayerAdvancementTracker` no-ops an already-earned
+    criterion the same way vanilla's own do, so none of this needed its own
+    "already granted" bookkeeping the way the milestone item rewards did
+  - [x] Advancement for first catch, first Perfect Catch, first Epic ripple
+    catch, first Legendary ripple catch
+  - [x] Advancement for full journal completion per biome (Ocean/Swamp/
+    Jungle), plus one for full 100% completion (the Legendary/capstone
+    unlock) - `data/ddv_fishing/advancement/`, all through vanilla's own
+    advancement/toast system, not a custom UI. Root tab reuses vanilla's
+    "stone" background sprite as a placeholder (no custom art for it yet)
 
 ---
 

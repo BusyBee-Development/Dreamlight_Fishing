@@ -1,0 +1,23 @@
+{
+  "parent": "ddv_fishing:first_catch",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "ddv_fishing:river_piranha"
+    },
+    "title": {
+      "translate": "advancements.ddv_fishing.jungle_complete.title"
+    },
+    "description": {
+      "translate": "advancements.ddv_fishing.jungle_complete.description"
+    }
+  },
+  "criteria": {
+    "jungle_complete": {
+      "trigger": "ddv_fishing:biome_complete",
+      "conditions": {
+        "biome": "jungle"
+      }
+    }
+  }
+}

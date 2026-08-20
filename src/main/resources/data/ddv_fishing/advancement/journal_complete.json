@@ -1,0 +1,21 @@
+{
+  "parent": "ddv_fishing:jungle_complete",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "ddv_fishing:legendary_fishing_rod"
+    },
+    "title": {
+      "translate": "advancements.ddv_fishing.journal_complete.title"
+    },
+    "description": {
+      "translate": "advancements.ddv_fishing.journal_complete.description"
+    },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "complete": {
+      "trigger": "ddv_fishing:journal_complete"
+    }
+  }
+}

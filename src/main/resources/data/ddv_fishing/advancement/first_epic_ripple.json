@@ -1,0 +1,20 @@
+{
+  "parent": "ddv_fishing:first_catch",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "minecraft:orange_dye"
+    },
+    "title": {
+      "translate": "advancements.ddv_fishing.first_epic_ripple.title"
+    },
+    "description": {
+      "translate": "advancements.ddv_fishing.first_epic_ripple.description"
+    }
+  },
+  "criteria": {
+    "epic": {
+      "trigger": "ddv_fishing:first_epic_ripple"
+    }
+  }
+}

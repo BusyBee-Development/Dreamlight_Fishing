@@ -48,18 +48,21 @@ public class FishingLootHandler {
         String rarityName = switch (rarity) {
             case 1 -> "rare";
             case 2 -> "epic";
+            case 3 -> "legendary";
             default -> "common";
         };
 
         // Biome-flavoured tables (ocean/swamp/jungle_<rarity>) exist alongside the generic ones;
         // anywhere else falls back to the plain vanilla-heavy table rather than needing a table
-        // for every biome in the game.
+        // for every biome in the game. Legendary is global instead - it's only rollable once a
+        // player has unlocked it (RippleSpawner.rollRarity), and the fish it carries can turn up
+        // "anywhere" by design, so it never takes a biome prefix.
         FishBiome biome = FishBiome.classify(world, BlockPos.ofFloored(bobber.getX(), bobber.getY(), bobber.getZ()));
-        String biomePrefix = switch (biome) {
+        String biomePrefix = rarity == 3 ? "" : switch (biome) {
             case OCEAN -> "ocean_";
             case SWAMP -> "swamp_";
             case JUNGLE -> "jungle_";
-            case OTHER -> "";
+            case OTHER, LEGENDARY -> "";
         };
         Identifier lootTableId = Identifier.of("ddv_fishing", "gameplay/fishing/" + biomePrefix + rarityName);
 

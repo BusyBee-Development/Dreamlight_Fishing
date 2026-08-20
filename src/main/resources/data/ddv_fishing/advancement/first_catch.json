@@ -1,0 +1,20 @@
+{
+  "parent": "ddv_fishing:root",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "minecraft:cod"
+    },
+    "title": {
+      "translate": "advancements.ddv_fishing.first_catch.title"
+    },
+    "description": {
+      "translate": "advancements.ddv_fishing.first_catch.description"
+    }
+  },
+  "criteria": {
+    "caught": {
+      "trigger": "ddv_fishing:first_catch"
+    }
+  }
+}

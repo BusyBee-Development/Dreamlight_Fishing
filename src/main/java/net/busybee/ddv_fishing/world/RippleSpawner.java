@@ -2,6 +2,8 @@ package net.busybee.ddv_fishing.world;
 
 import net.busybee.ddv_fishing.Ddv_fishing;
 import net.busybee.ddv_fishing.entity.FishingRippleEntity;
+import net.busybee.ddv_fishing.journal.FishJournalData;
+import net.busybee.ddv_fishing.registry.ModAttachments;
 import net.busybee.ddv_fishing.registry.ModEntities;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.block.Blocks;
@@ -58,23 +60,38 @@ public class RippleSpawner {
     }
 
     /**
-     * Picks a ripple rarity: 0 blue, 1 green, 2 orange.
+     * Picks a ripple rarity: 0 blue, 1 green, 2 orange, 3 gold (Legendary).
      * <p>
-     * Reads the two chances from config so the mix can be tuned - and so orange can be turned up
-     * to test, since at its 10% default you can fish for a long while without ever meeting one.
+     * Reads the chances from config so the mix can be tuned - and so orange can be turned up to
+     * test, since at its 10% default you can fish for a long while without ever meeting one.
+     * Legendary is only ever rolled for a player whose journal is complete (see
+     * {@link FishJournalData#isComplete}) - everyone else has exactly the pre-Phase-3 blue/green/
+     * orange mix, unchanged.
      * <p>
      * Luck raises the roll rather than lowering it. It used to subtract, which pushed every lucky
      * player towards blue: exactly backwards, and on by default.
      */
     private static int rollRarity(ServerWorld world, ServerPlayerEntity player) {
-        float orange = Math.max(0.0f, Ddv_fishing.CONFIG.orange_ripple_chance);
-        float green = Math.max(0.0f, Ddv_fishing.CONFIG.green_ripple_chance);
-        // A misconfigured pair that sums past 1 would make blue unreachable and orange's own
-        // threshold negative, so scale them back into range instead of trusting the file.
-        if (orange + green > 1.0f) {
-            float scale = 1.0f / (orange + green);
+        // The 50% "Seasoned Angler" milestone's permanent reward - a flat bump to both, granted
+        // once by FishJournalManager and stored per-player rather than in the global config.
+        float bonus = player.getAttachedOrCreate(ModAttachments.RIPPLE_BONUS);
+        float orange = Math.max(0.0f, Ddv_fishing.CONFIG.orange_ripple_chance + bonus);
+        float green = Math.max(0.0f, Ddv_fishing.CONFIG.green_ripple_chance + bonus);
+
+        float legendary = 0.0f;
+        FishJournalData journal = player.getAttachedOrCreate(ModAttachments.FISH_JOURNAL);
+        if (journal.isComplete()) {
+            legendary = Math.max(0.0f, Ddv_fishing.CONFIG.legendary_ripple_chance);
+        }
+
+        // A misconfigured set summing past 1 would make blue unreachable and the higher tiers'
+        // own thresholds negative, so scale them back into range instead of trusting the file.
+        float total = orange + green + legendary;
+        if (total > 1.0f) {
+            float scale = 1.0f / total;
             orange *= scale;
             green *= scale;
+            legendary *= scale;
         }
 
         float r = world.getRandom().nextFloat();
@@ -82,8 +99,9 @@ public class RippleSpawner {
             r += player.getLuck() * 0.05f;
         }
 
-        if (r >= 1.0f - orange) return 2;
-        if (r >= 1.0f - orange - green) return 1;
+        if (r >= 1.0f - legendary) return 3;
+        if (r >= 1.0f - legendary - orange) return 2;
+        if (r >= 1.0f - legendary - orange - green) return 1;
         return 0;
     }
 

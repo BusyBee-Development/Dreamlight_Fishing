@@ -28,6 +28,13 @@ public class ModConfig {
     /** Share of ripples that spawn orange - the hardest catch. The rest spawn blue. */
     public float orange_ripple_chance = 0.10f;
 
+    /**
+     * Share of ripples that spawn gold (Legendary) instead of blue, for players who have unlocked
+     * it. Rolled separately from green/orange rather than folded into their pool - see
+     * {@code RippleSpawner.rollRarity}.
+     */
+    public float legendary_ripple_chance = 0.02f;
+
     /** Extra size rolls taken (keeping the largest) on a Perfect Catch - higher values push perfect-catch sizes closer to the max. */
     public int perfect_catch_size_rolls = 2;
 

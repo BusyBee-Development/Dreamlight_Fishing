@@ -1,0 +1,22 @@
+{
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "ddv_fishing:magical_fishing_rod"
+    },
+    "title": {
+      "translate": "advancements.ddv_fishing.root.title"
+    },
+    "description": {
+      "translate": "advancements.ddv_fishing.root.description"
+    },
+    "background": "minecraft:gui/advancements/backgrounds/stone",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:tick"
+    }
+  }
+}

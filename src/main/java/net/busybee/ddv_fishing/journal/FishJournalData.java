@@ -53,6 +53,29 @@ public record FishJournalData(List<FishJournalEntry> entries) {
         return new FishJournalData(List.copyOf(copy));
     }
 
+    /**
+     * Completion, 0.0-1.0, across the species that were catchable from the start - i.e. everything
+     * except {@link FishBiome#LEGENDARY}. This is what the 25/50/75/100% milestone rewards and the
+     * Legendary-tier unlock are measured against; it deliberately excludes the Legendary fish
+     * itself, since that fish can't be caught until this same fraction hits 1.0 and unlocks the
+     * ripple tier it comes from - counting it would make 100% unreachable.
+     */
+    public float completionFraction() {
+        int caught = 0;
+        int total = 0;
+        for (FishJournalEntry entry : entries) {
+            if (entry.species().biome() == FishBiome.LEGENDARY) continue;
+            total++;
+            if (entry.caught()) caught++;
+        }
+        return total == 0 ? 0f : (float) caught / total;
+    }
+
+    /** Every species catchable from the start has been caught - see {@link #completionFraction}. */
+    public boolean isComplete() {
+        return completionFraction() >= 1.0f;
+    }
+
     /** Per-biome {@code {caught, total}} counts, for the journal's "Ocean: 2/2"-style headers. */
     public Map<FishBiome, int[]> biomeCounts() {
         Map<FishBiome, int[]> counts = new EnumMap<>(FishBiome.class);

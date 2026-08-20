@@ -35,6 +35,7 @@ public final class MinigameRules {
         return switch (rarity) {
             case 1 -> 3;
             case 2 -> 4;
+            case 3 -> 5;
             default -> 2;
         };
     }
@@ -44,23 +45,58 @@ public final class MinigameRules {
         return switch (rarity) {
             case 1 -> 0.035f;
             case 2 -> 0.05f;
+            case 3 -> 0.06f;
             default -> 0.025f;
         };
     }
 
-    /** Tension added per tick while reeling. */
+    /**
+     * Tension added per tick while reeling.
+     * <p>
+     * Epic (2) is deliberately not a straight-line continuation of common/rare's step - see
+     * {@link #progressGainFor} and {@link #resistanceFor} for why.
+     */
     public static float tensionGainFor(int rarity) {
-        return 0.015f + rarity * 0.005f;
+        return switch (rarity) {
+            case 1 -> 0.020f;
+            case 2 -> 0.021f;
+            case 3 -> 0.0215f;
+            default -> 0.015f;
+        };
     }
 
-    /** Progress added per tick while reeling. */
+    /**
+     * Progress added per tick while reeling.
+     * <p>
+     * A winnable rarity needs {@code resistance * tensionGain < TENSION_RELIEF * progressGain} -
+     * some reel/release ratio where progress trends up while tension trends flat or down. The old
+     * linear formulas (tensionGain climbing while progressGain fell, both by a fixed step per
+     * rarity) put epic on the wrong side of that inequality: even holding the reel key down the
+     * entire time capped out around 57% progress before the tension cap forced a snap, and every
+     * more cautious ratio just traded that for bleeding progress to zero instead. These three
+     * values keep epic the hardest tier on every axis (worse than rare's tension gain, progress
+     * gain, and resistance) while landing back on the winnable side, just with a much tighter
+     * margin than rare's. Legendary (3) tightens that same margin further still - hardest on all
+     * three axes, but solved against the same inequality rather than eyeballed, so it stays
+     * winnable rather than repeating epic's old mistake.
+     */
     public static float progressGainFor(int rarity) {
-        return 0.012f - rarity * 0.002f;
+        return switch (rarity) {
+            case 1 -> 0.010f;
+            case 2 -> 0.0105f;
+            case 3 -> 0.0098f;
+            default -> 0.012f;
+        };
     }
 
     /** Progress lost per tick while not reeling. */
     public static float resistanceFor(int rarity) {
-        return 0.004f + rarity * 0.003f;
+        return switch (rarity) {
+            case 1 -> 0.007f;
+            case 2 -> 0.0075f;
+            case 3 -> 0.0079f;
+            default -> 0.004f;
+        };
     }
 
     /** The margin in force right now - a storm tightens it. */

@@ -2,9 +2,11 @@ package net.busybee.ddv_fishing.client;
 
 import net.busybee.ddv_fishing.client.entity.FishingRippleRenderer;
 import net.busybee.ddv_fishing.client.hud.FishingMinigameOverlay;
+import net.busybee.ddv_fishing.client.item.LegendaryFishingRodRenderer;
 import net.busybee.ddv_fishing.client.item.MagicalFishingRodRenderer;
 import net.busybee.ddv_fishing.client.journal.FishJournalClientState;
 import net.busybee.ddv_fishing.client.journal.FishJournalScreen;
+import net.busybee.ddv_fishing.item.LegendaryFishingRodItem;
 import net.busybee.ddv_fishing.item.MagicalFishingRodItem;
 import net.busybee.ddv_fishing.networking.ModPacketsClient;
 import net.busybee.ddv_fishing.registry.ModEntities;
@@ -53,6 +55,19 @@ public class Ddv_fishingClient implements ClientModInitializer {
             public GeoItemRenderer<?> getGeoItemRenderer() {
                 if (this.renderer == null) {
                     this.renderer = new MagicalFishingRodRenderer();
+                }
+
+                return this.renderer;
+            }
+        };
+
+        LegendaryFishingRodItem.legendaryClientRenderProvider = new GeoRenderProvider() {
+            private @Nullable LegendaryFishingRodRenderer renderer;
+
+            @Override
+            public GeoItemRenderer<?> getGeoItemRenderer() {
+                if (this.renderer == null) {
+                    this.renderer = new LegendaryFishingRodRenderer();
                 }
 
                 return this.renderer;

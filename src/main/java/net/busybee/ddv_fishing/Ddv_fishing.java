@@ -3,6 +3,7 @@ package net.busybee.ddv_fishing;
 import net.busybee.ddv_fishing.journal.FishJournalManager;
 import net.busybee.ddv_fishing.networking.ModPackets;
 import net.busybee.ddv_fishing.registry.ModAttachments;
+import net.busybee.ddv_fishing.registry.ModCriteria;
 import net.busybee.ddv_fishing.registry.ModEntities;
 import net.busybee.ddv_fishing.registry.ModItems;
 import net.busybee.ddv_fishing.world.RippleSpawner;
@@ -24,6 +25,7 @@ public class Ddv_fishing implements ModInitializer {
         ModEntities.register();
         ModItems.register();
         ModAttachments.register();
+        ModCriteria.register();
         ModPackets.registerPayloads();
         ModPackets.registerServerHandlers();
         RippleSpawner.register();
